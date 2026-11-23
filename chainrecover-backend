@@ -1,0 +1,14 @@
+chainrecover-backend/
+├── package.json
+├── .env
+├── server.js
+├── db.js
+├── utils.js
+├── middleware/
+│   └── auth.js
+├── routes/
+│   ├── auth.js
+│   ├── wallet.js
+│   ├── cases.js
+│   └── admin.js
+└── data/            ← created automatically
