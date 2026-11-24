@@ -1,21 +1,11 @@
-const Database = require('better-sqlite3');
-const path = require('path');
-const fs = require('fs');
+const { createClient } = require('@libsql/client');
 
-// If on Render, use the persistent disk path. Otherwise, use local folder.
-const basePath = process.env.RENDER ? '/data' : __dirname;
-const dataDir = path.join(basePath, 'data');
+const db = createClient({
+  url: process.env.TURSO_DATABASE_URL,
+  authToken: process.env.TURSO_AUTH_TOKEN,
+});
 
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
-}
-
-// Point to the database
-const db = new Database(path.join(dataDir, 'chainrecover.db'));
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
-
-db.exec(`
+db.execute(`
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL, country TEXT NOT NULL, phone TEXT NOT NULL,
@@ -51,6 +41,6 @@ CREATE TABLE IF NOT EXISTS withdrawals (
   amount REAL NOT NULL, address TEXT NOT NULL, status TEXT DEFAULT 'Pending',
   created_at INTEGER NOT NULL, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-`);
+`).catch(console.error);
 
 module.exports = db;
