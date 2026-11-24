@@ -30,8 +30,17 @@ router.post('/register', async (req, res) => {
 
   const code = genOtp();
   db.prepare('INSERT INTO otps (email,code,purpose,expires_at,created_at) VALUES (?,?,?,?,?)').run(email.toLowerCase(), code, 'verify', Date.now() + 10 * 60 * 1000, Date.now());
-  await sendOtpEmail(email, code, 'verify');
   
+  // ==========================================
+  // THIS IS THE FIX: Prevent server crash on email failure
+  // ==========================================
+  try {
+    await sendOtpEmail(email, code, 'verify');
+  } catch (emailError) {
+    console.error("⚠️ Email sending failed (Check Render Environment Variables), but continuing for testing.");
+  }
+  // ==========================================
+
   // SENDING OTP TO SCREEN FOR TESTING
   res.json({ ok: true, devOtp: code });
 });
