@@ -2,12 +2,15 @@ const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
 
-// THIS LINE FIXES THE CRASH: It creates the 'data' folder if it doesn't exist
-const dataDir = path.join(__dirname, 'data');
+// If on Render, use the persistent disk path. Otherwise, use local folder.
+const basePath = process.env.RENDER ? '/data' : __dirname;
+const dataDir = path.join(basePath, 'data');
+
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 
+// Point to the database
 const db = new Database(path.join(dataDir, 'chainrecover.db'));
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
