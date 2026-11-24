@@ -32,14 +32,17 @@
   /* MAIN CONTENT */
   .wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
   .header-row { display: flex; justify-content: space-between; align-items: center; margin: 30px 0 15px; flex-wrap: wrap; gap: 15px; }
-  .section-title { font-size: 1.1rem; color: #fff; margin: 0; font-weight: 700; }
-  .search-bar { padding: 10px 16px; border-radius: 10px; background: #0b1322; border: 1px solid #1a2a3a; color: #fff; width: 100%; max-width: 300px; transition: 0.2s; }
+  .section-title { font-size: 1.1rem; color: #fff; margin: 0; font-weight: 700; display: flex; align-items: center; gap: 10px;}
+  .search-container { display: flex; gap: 10px; width: 100%; max-width: 400px; }
+  .search-bar { padding: 10px 16px; border-radius: 10px; background: #0b1322; border: 1px solid #1a2a3a; color: #fff; width: 100%; transition: 0.2s; }
   .search-bar:focus { border-color: #00e5a0; box-shadow: 0 0 0 3px rgba(0,229,160,0.1); }
+  .btn-refresh { background: #1a2a3a; color: #fff; border: none; padding: 10px 16px; border-radius: 10px; cursor: pointer; font-weight: 600; white-space: nowrap;}
+  .btn-refresh:hover { background: #2a3a4a; }
   
   /* TABLES */
   .table-card { background: #0b1322; border: 1px solid #1a2a3a; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
   .tbl-wrap { overflow-x: auto; max-height: 500px; overflow-y: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 750px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 800px; }
   th { text-align: left; padding: 14px 16px; font-size: 0.75rem; color: #93a1b8; text-transform: uppercase; background: #05070e; border-bottom: 1px solid #1a2a3a; position: sticky; top: 0; z-index: 1; }
   td { padding: 14px 16px; border-bottom: 1px solid #1a2a3a; vertical-align: middle; }
   tr:hover td { background: rgba(255,255,255,0.02); }
@@ -66,8 +69,8 @@
   .d-body { padding: 24px; flex: 1; }
   .info-row { margin-bottom: 14px; display: flex; justify-content: space-between; border-bottom: 1px dashed #1a2a3a; padding-bottom: 8px; }
   .info-row label { font-size: 0.75rem; color: #93a1b8; text-transform: uppercase; font-weight: 600; }
-  .info-row .val { font-size: 0.9rem; font-weight: 600; text-align: right; }
-  .info-row .val.mono { font-family: monospace; font-size: 0.8rem; color: #00e5a0; word-break: break-all; max-width: 60%; }
+  .info-row .val { font-size: 0.9rem; font-weight: 600; text-align: right; max-width: 60%; word-break: break-all;}
+  .info-row .val.mono { font-family: monospace; font-size: 0.8rem; color: #00e5a0; }
   
   .btn-lock { width: 100%; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; margin-top: 10px; transition: 0.2s; }
   
@@ -83,10 +86,21 @@
   .btn-danger { width: 100%; padding: 14px; border-radius: 10px; font-weight: 700; background: rgba(255,107,129,0.1); color: #ff6b81; border: 1px solid rgba(255,107,129,0.3); cursor: pointer; margin-top: 12px; transition: 0.2s; }
   .btn-danger:hover { background: rgba(255,107,129,0.2); }
 
+  /* CUSTOM MODAL */
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); display: none; place-items: center; z-index: 200; padding: 20px; }
+  .modal.open { display: grid; }
+  .modal-box { background: #0b1322; border: 1px solid #1a2a3a; border-radius: 16px; width: 100%; max-width: 400px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+  .modal-box h3 { margin-top: 0; color: #fff; margin-bottom: 15px; font-size: 1.2rem;}
+  .modal-box p { color: #93a1b8; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5; }
+  .modal-input { width: 100%; padding: 12px; background: #05070e; border: 1px solid #1a2a3a; color: #fff; border-radius: 8px; margin-bottom: 15px; }
+  .modal-btns { display: flex; gap: 10px; }
+  .modal-btns button { flex: 1; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; }
+  .modal-cancel { background: #1a2a3a; color: #fff; }
+  .modal-confirm { background: #00e5a0; color: #03130d; }
+
   @media (max-width: 600px) {
     .bal-grid { grid-template-columns: 1fr 1fr; }
     .header-row { flex-direction: column; align-items: stretch; }
-    .search-bar { max-width: 100%; }
   }
 </style>
 </head>
@@ -113,6 +127,7 @@
       <!-- WITHDRAWALS SECTION -->
       <div class="header-row">
         <h2 class="section-title">Withdrawal Requests</h2>
+        <button class="btn-refresh" onclick="loadWithdrawals(); loadUsers();">↻ Refresh</button>
       </div>
       <div class="table-card">
         <div class="tbl-wrap">
@@ -126,12 +141,14 @@
       <!-- USERS SECTION -->
       <div class="header-row">
         <h2 class="section-title">Registered Users</h2>
-        <input type="text" id="userSearch" class="search-bar" placeholder="🔍 Search by name or email..." onkeyup="renderUsers()">
+        <div class="search-container">
+          <input type="text" id="userSearch" class="search-bar" placeholder="🔍 Search name, email, or wallet..." onkeyup="renderUsers()">
+        </div>
       </div>
       <div class="table-card">
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>Name</th><th>Email</th><th>Total USD</th><th>Status</th><th>Manage</th></tr></thead>
+            <thead><tr><th>Name</th><th>Email</th><th>Joined</th><th>Total USD</th><th>Status</th><th>Manage</th></tr></thead>
             <tbody id="userTable"></tbody>
           </table>
         </div>
@@ -159,28 +176,42 @@
           <span id="dStatusPill" class="pill Active">Active</span>
         </div>
         
-        <button id="lockBtn" class="btn-lock" onclick="toggleLock()">Suspend Account</button>
-        <button class="btn-danger" onclick="deleteUser()">Delete Account Permanently</button>
+        <button id="lockBtn" class="btn-lock" onclick="openLockModal()">Suspend Account</button>
+        <button class="btn-danger" onclick="openDeleteModal()">Delete Account Permanently</button>
 
         <div style="height:1px; background:#1a2a3a; margin:30px 0;"></div>
 
         <label style="font-size:1rem; font-weight:700; color:#00e5a0;">Edit Wallet Balances</label>
-        <p style="font-size:0.8rem; color:#93a1b8; margin:5px 0 15px;">Type new amounts below. Changes are logged automatically.</p>
+        <p style="font-size:0.8rem; color:#93a1b8; margin:5px 0 15px;">Type new amounts. Changes are credited/debited automatically to their history.</p>
         
         <div class="bal-grid" id="balGrid"></div>
         
-        <input type="text" id="adjustNote" placeholder="Reason for adjustment (e.g., Deposit, Bonus)" style="width:100%; padding:14px; background:#05070e; border:1px solid #1a2a3a; border-radius:8px; color:white; margin-top:15px;">
-        <button class="btn-save" onclick="saveBalances()">Save Balance Changes</button>
+        <input type="text" id="adjustNote" placeholder="Reason (e.g., Bonus, Manual Deposit)" style="width:100%; padding:14px; background:#05070e; border:1px solid #1a2a3a; border-radius:8px; color:white; margin-top:15px;">
+        <button class="btn-save" onclick="openSaveModal()">Save Balance Changes</button>
       </div>
     </div>
   </div>
 
-  <!-- Import your api.js -->
+  <!-- CUSTOM MODAL (For Prompts/Confirms) -->
+  <div class="modal" id="actionModal">
+    <div class="modal-box">
+      <h3 id="modalTitle">Confirm Action</h3>
+      <p id="modalDesc">Are you sure?</p>
+      <input type="text" id="modalInput" class="modal-input hidden" placeholder="Type here...">
+      <div class="modal-btns">
+        <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+        <button class="modal-confirm" id="modalConfirmBtn" onclick="executeModalAction()">Confirm</button>
+      </div>
+    </div>
+  </div>
+
   <script src="api.js"></script>
   
   <script>
     let allUsers = [];
     let currentUser = null;
+    let modalActionType = ''; // 'lock', 'delete', 'save'
+    
     const prices = { BNB: 580, BTC: 67000, ETH: 3400, MATIC: 0.7, ECE: 1, USDT: 1, USDC: 1, SOL: 145, TRX: 0.13 };
     const COINS = ['BNB','BTC','ETH','MATIC','ECE','USDT','USDC','SOL','TRX'];
 
@@ -207,7 +238,7 @@
     async function loadUsers() {
       try {
         const data = await api('/api/admin/users', { auth: 'admin' });
-        allUsers = data.users;
+        allUsers = data.users || [];
         renderUsers();
       } catch (err) { 
         alert('Session expired. Please log in again.'); 
@@ -227,21 +258,27 @@
       );
 
       if (filtered.length === 0) {
-        html = '<tr><td colspan="5" style="text-align:center; color:#93a1b8; padding:30px;">No users found.</td></tr>';
+        html = '<tr><td colspan="6" style="text-align:center; color:#93a1b8; padding:30px;">No users found.</td></tr>';
       }
 
       filtered.forEach(u => {
         let totalUsd = 0;
-        for (const [coin, amt] of Object.entries(u.balances)) {
+        // Safely check balances
+        const bals = u.balances || {};
+        for (const [coin, amt] of Object.entries(bals)) {
           totalUsd += amt * (prices[coin] || 0);
         }
+        
         const status = u.locked ? '<span class="pill Suspended">Suspended</span>' : '<span class="pill Active">Active</span>';
+        const joinDate = u.created_at ? new Date(u.created_at).toLocaleDateString() : '-';
+        
         html += `<tr>
-          <td><b>${u.name}</b></td>
+          <td><b>${u.name || 'N/A'}</b></td>
           <td>${u.email}</td>
+          <td style="color:#93a1b8;">${joinDate}</td>
           <td style="color:#00e5a0; font-weight:bold;">$${totalUsd.toFixed(2)}</td>
           <td>${status}</td>
-          <td><button class="btn-manage" onclick="openDrawer(${u.id})">Manage / Edit</button></td>
+          <td><button class="btn-manage" onclick="openDrawer(${u.id})">Manage</button></td>
         </tr>`;
       });
       document.getElementById('userTable').innerHTML = html;
@@ -252,12 +289,13 @@
       try {
         const data = await api('/api/admin/withdrawals', { auth: 'admin' });
         let html = '';
+        const withdrawals = data.withdrawals || [];
         
-        if(data.withdrawals.length === 0) {
+        if(withdrawals.length === 0) {
           html = '<tr><td colspan="6" style="text-align:center; color:#93a1b8; padding:30px;">No withdrawal requests found.</td></tr>';
         }
 
-        data.withdrawals.forEach(w => {
+        withdrawals.forEach(w => {
           const user = allUsers.find(u => u.id === w.user_id);
           const uname = user ? `${user.name} <br><small style="color:#93a1b8;">${user.email}</small>` : 'User #' + w.user_id;
           const destAddress = w.address || (user ? user.wallet_address : 'N/A');
@@ -318,8 +356,9 @@
       }
 
       let bHtml = '';
+      const bals = currentUser.balances || {};
       COINS.forEach(c => {
-        bHtml += `<div class="bal-box"><span>${c}</span><input type="number" id="bal_${c}" value="${currentUser.balances[c] || 0}" step="any"></div>`;
+        bHtml += `<div class="bal-box"><span>${c}</span><input type="number" id="bal_${c}" value="${bals[c] || 0}" step="any"></div>`;
       });
       document.getElementById('balGrid').innerHTML = bHtml;
       document.getElementById('adjustNote').value = ''; 
@@ -333,54 +372,107 @@
       currentUser = null;
     }
 
-    // --- SUSPEND / BAN ---
-    async function toggleLock() {
+    // --- CUSTOM MODAL LOGIC ---
+    function openLockModal() {
+      if(!currentUser) return;
+      modalActionType = 'lock';
       const isLocking = !currentUser.locked;
-      const reason = isLocking ? prompt("Reason for suspension (optional):") : "";
-      if (isLocking && reason === null) return; 
       
-      try {
-        await api(`/api/admin/users/${currentUser.id}/lock`, { method: 'PATCH', auth: 'admin', body: { locked: isLocking, reason } });
-        loadUsers(); 
-        closeDrawer();
-      } catch (err) { alert(err.message); }
-    }
-
-    // --- DELETE USER ---
-    async function deleteUser() {
-      const confirmText = prompt(`This will PERMANENTLY delete ${currentUser.name} and all their data.\n\nType "DELETE" to confirm:`);
-      if (confirmText !== 'DELETE') {
-        if(confirmText !== null) alert('Deletion cancelled. You must type DELETE exactly.');
-        return;
+      document.getElementById('modalTitle').innerText = isLocking ? 'Suspend Account' : 'Activate Account';
+      document.getElementById('modalDesc').innerText = isLocking 
+        ? `Are you sure you want to suspend ${currentUser.name}? They will not be able to log in.` 
+        : `Reactivate ${currentUser.name}'s account? They will regain access.`;
+        
+      const input = document.getElementById('modalInput');
+      if (isLocking) {
+        input.classList.remove('hidden');
+        input.value = '';
+        input.placeholder = "Optional: Reason for suspension";
+      } else {
+        input.classList.add('hidden');
       }
       
-      try {
-        await api(`/api/admin/users/${currentUser.id}`, { method: 'DELETE', auth: 'admin' });
-        alert('User account deleted permanently.');
-        loadUsers();
-        closeDrawer();
-      } catch (err) { alert(err.message); }
+      document.getElementById('modalConfirmBtn').style.background = isLocking ? '#ff6b81' : '#00e5a0';
+      document.getElementById('modalConfirmBtn').style.color = isLocking ? '#fff' : '#03130d';
+      document.getElementById('actionModal').classList.add('open');
     }
 
-    // --- SAVE BALANCES ---
-    async function saveBalances() {
-      const newBals = {};
-      COINS.forEach(c => { 
-        newBals[c] = parseFloat(document.getElementById(`bal_${c}`).value) || 0; 
-      });
-      
-      const note = document.getElementById('adjustNote').value || 'Admin Balance Adjustment';
+    function openDeleteModal() {
+      if(!currentUser) return;
+      modalActionType = 'delete';
+      document.getElementById('modalTitle').innerText = 'Delete User Permanently';
+      document.getElementById('modalDesc').innerText = `This action cannot be undone. All balances and history for ${currentUser.name} will be wiped. Type "DELETE" below to confirm.`;
+      const input = document.getElementById('modalInput');
+      input.classList.remove('hidden');
+      input.value = '';
+      input.placeholder = "Type DELETE";
+      document.getElementById('modalConfirmBtn').style.background = '#ff6b81';
+      document.getElementById('modalConfirmBtn').style.color = '#fff';
+      document.getElementById('actionModal').classList.add('open');
+    }
+
+    function openSaveModal() {
+      if(!currentUser) return;
+      modalActionType = 'save';
+      document.getElementById('modalTitle').innerText = 'Save Balances';
+      document.getElementById('modalDesc').innerText = `Update balances for ${currentUser.name}? This will automatically update their wallet history.`;
+      document.getElementById('modalInput').classList.add('hidden');
+      document.getElementById('modalConfirmBtn').style.background = '#00e5a0';
+      document.getElementById('modalConfirmBtn').style.color = '#03130d';
+      document.getElementById('actionModal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('actionModal').classList.remove('open');
+      modalActionType = '';
+    }
+
+    async function executeModalAction() {
+      if (!currentUser || !modalActionType) return;
+      const btn = document.getElementById('modalConfirmBtn');
+      btn.innerText = 'Processing...';
+      btn.disabled = true;
 
       try {
-        await api(`/api/admin/users/${currentUser.id}/balances`, { 
-          method: 'PATCH', 
-          auth: 'admin', 
-          body: { balances: newBals, note } 
-        });
-        alert('Balances saved and user history updated!'); 
-        loadUsers(); 
-        closeDrawer();
-      } catch (err) { alert(err.message); }
+        if (modalActionType === 'lock') {
+          const isLocking = !currentUser.locked;
+          const reason = document.getElementById('modalInput').value;
+          await api(`/api/admin/users/${currentUser.id}/lock`, { method: 'PATCH', auth: 'admin', body: { locked: isLocking, reason } });
+          await loadUsers(); 
+          closeDrawer();
+          
+        } else if (modalActionType === 'delete') {
+          const confirmText = document.getElementById('modalInput').value;
+          if (confirmText !== 'DELETE') {
+            alert('You must type DELETE exactly to confirm.');
+            btn.innerText = 'Confirm';
+            btn.disabled = false;
+            return;
+          }
+          await api(`/api/admin/users/${currentUser.id}`, { method: 'DELETE', auth: 'admin' });
+          alert('User deleted permanently.');
+          await loadUsers();
+          closeDrawer();
+          
+        } else if (modalActionType === 'save') {
+          const newBals = {};
+          COINS.forEach(c => { 
+            newBals[c] = parseFloat(document.getElementById(`bal_${c}`).value) || 0; 
+          });
+          const note = document.getElementById('adjustNote').value || 'Admin Balance Adjustment';
+          
+          await api(`/api/admin/users/${currentUser.id}/balances`, { method: 'PATCH', auth: 'admin', body: { balances: newBals, note } });
+          alert('Balances updated and history logged!'); 
+          await loadUsers(); 
+          closeDrawer();
+        }
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        closeModal();
+        btn.innerText = 'Confirm';
+        btn.disabled = false;
+      }
     }
 
     // --- LOGOUT ---
