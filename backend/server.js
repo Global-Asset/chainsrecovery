@@ -14,7 +14,7 @@ app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json({ limit: '2mb' }));
 
 // Serve the frontend files (HTML, CSS, JS)
-app.get('/wallet.html', (req, res) => res.redirect(302, '/client-portal.html'));
+app.get('/client-portal.html', (req, res) => res.redirect(302, '/wallet.html'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors({ origin: true, credentials: true }));
 

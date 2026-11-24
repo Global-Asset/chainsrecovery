@@ -135,15 +135,43 @@
       try {
         const body = {
           name: document.getElementById('regName').value,
-          email: document.getElementById('regEmail').value,
+          email: document.getElementById('regEmail').value.trim(),
           password: document.getElementById('regPass').value,
           country: document.getElementById('regCountry').value,
           phone: document.getElementById('regPhone').value,
           address: document.getElementById('regAddress').value
         };
+        const ethereum = window.ethereum;
+        if (!ethereum) throw new Error('Open this page in MetaMask or another Ethereum-compatible wallet.');
+
+        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+        const walletAddress = accounts[0];
+        if (!walletAddress || !/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
+          throw new Error('Your wallet did not return a valid Ethereum address.');
+        }
+
+        const chainId = await ethereum.request({ method: 'eth_chainId' });
+        if (chainId !== '0x1') {
+          await ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x1' }] });
+        }
+
+        const challenge = await api('/api/auth/wallet-challenge', {
+          method: 'POST',
+          body: { email: body.email, walletAddress }
+        });
+        const signature = await ethereum.request({
+          method: 'personal_sign',
+          params: [challenge.message, walletAddress]
+        });
+        const registration = await api('/api/auth/register-wallet', {
+          method: 'POST',
+          body: { ...body, walletAddress, challengeId: challenge.challengeId, signature }
+        });
+
         currentEmail = body.email;
-        const data = await api('/api/auth/register', { method: 'POST', body });
-        alert('Account created!\n\nYOUR OTP CODE IS: ' + data.devOtp);
+        alert(registration.devOtp
+          ? 'Account created!\n\nYOUR OTP CODE IS: ' + registration.devOtp
+          : 'Account created! Check your email for the verification code.');
         show('otpView');
       } catch (err) { alert(err.message); }
     }
