@@ -12,14 +12,17 @@
   .coin-row { background: #1a2a3a; padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; cursor: pointer; transition: 0.2s; }
   .coin-row:hover { background: #2a3a4a; }
   
-  /* Modal */
-  .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; padding: 20px; }
+  .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
   .modal.open { display: flex; }
   .modal-content { background: #0b1322; width: 100%; max-width: 400px; padding: 25px; border-radius: 15px; border: 1px solid #00e5a0; }
-  .tx-row { display: flex; justify-content: space-between; border-bottom: 1px solid #1a2a3a; padding: 10px 0; font-size: 14px; }
+  .tx-row { display: flex; justify-content: space-between; border-bottom: 1px solid #1a2a3a; padding: 10px 0; font-size: 13px; }
   .btn-group { display: flex; gap: 10px; margin-top: 15px; }
   .btn-group button { margin: 0; }
   .btn-alt { background: #3b82f6; color: white; }
+  
+  /* Action Panels inside Modal */
+  .action-panel { margin-top: 20px; padding-top: 20px; border-top: 1px solid #1a2a3a; }
+  .addr-box { background: #05070e; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 12px; word-break: break-all; border: 1px solid #1a2a3a; margin-bottom: 10px; color: #00e5a0; }
 </style>
 </head>
 <body>
@@ -58,6 +61,12 @@
       <h2>My Wallet</h2>
       <button onclick="logout()" style="width:auto; padding:8px 12px; background:#ff6b81; color:white;">Sign Out</button>
     </div>
+    
+    <div style="margin-top:15px; background:#05070e; padding:10px; border-radius:8px; border:1px solid #1a2a3a;">
+      <small style="color:#93a1b8;">My Wallet Address (Click to copy)</small>
+      <div id="myWalletAddr" onclick="copyAddr()" style="font-family:monospace; font-size:12px; color:#00e5a0; cursor:pointer; word-break:break-all; margin-top:5px;"></div>
+    </div>
+
     <h1 id="totalUsd" style="color:#00e5a0; margin-top:20px;">$0.00</h1>
     <div id="coinList" style="margin-top:20px;"></div>
   </div>
@@ -70,21 +79,38 @@
         <button onclick="closeModal()" style="width:auto; padding:5px 10px; background:#ff6b81; color:white;">X</button>
       </div>
       
-      <div id="mBalance" style="font-size:24px; font-weight:bold; margin-bottom:10px;">0.00</div>
+      <div id="mBalance" style="font-size:24px; font-weight:bold; margin-bottom:5px;">0.00</div>
       <div id="mUsd" style="color:#93a1b8; margin-bottom:20px;">$0.00</div>
 
       <div class="btn-group">
-        <button class="btn-alt" onclick="contactAdmin('Deposit')">Deposit</button>
-        <button style="background:#ffc857; color:#000;" onclick="contactAdmin('Send')">Send</button>
-        <button style="background:#ff6b81; color:#fff;" onclick="showWithdrawForm()">Withdraw</button>
+        <button class="btn-alt" onclick="showPanel('deposit')">Deposit</button>
+        <button style="background:#ffc857; color:#000;" onclick="showPanel('send')">Send</button>
+        <button style="background:#ff6b81; color:#fff;" onclick="showPanel('withdraw')">Withdraw</button>
       </div>
 
-      <!-- WITHDRAW FORM -->
-      <div id="withdrawForm" class="hidden" style="margin-top:20px; padding-top:20px; border-top:1px solid #1a2a3a;">
-        <h4>Withdraw Funds</h4>
-        <input type="text" id="wAddress" placeholder="Destination Address">
-        <input type="number" id="wAmount" placeholder="Amount">
-        <button onclick="submitWithdraw()">Submit Request to Admin</button>
+      <!-- DEPOSIT PANEL -->
+      <div id="panel-deposit" class="action-panel hidden">
+        <label style="color:#93a1b8; font-size:12px;">Copy your address to receive funds:</label>
+        <div class="addr-box" id="depositAddr"></div>
+        <button onclick="copyAddr()">Copy Address</button>
+      </div>
+
+      <!-- SEND PANEL -->
+      <div id="panel-send" class="action-panel hidden">
+        <label style="color:#93a1b8; font-size:12px;">Receiver Wallet Address</label>
+        <input type="text" id="sAddress" placeholder="0x...">
+        <label style="color:#93a1b8; font-size:12px;">Amount</label>
+        <input type="number" id="sAmount" placeholder="0.00">
+        <button onclick="submitSend()" style="background:#ffc857; color:#000;">Send Funds</button>
+      </div>
+
+      <!-- WITHDRAW PANEL -->
+      <div id="panel-withdraw" class="action-panel hidden">
+        <label style="color:#93a1b8; font-size:12px;">External Address</label>
+        <input type="text" id="wAddress" placeholder="0x...">
+        <label style="color:#93a1b8; font-size:12px;">Amount</label>
+        <input type="number" id="wAmount" placeholder="0.00">
+        <button onclick="submitWithdraw()" style="background:#ff6b81; color:#fff;">Request Withdrawal</button>
       </div>
 
       <!-- HISTORY -->
@@ -96,8 +122,8 @@
   <script src="api.js"></script>
   <script>
     let currentEmail = '';
-    let userWallet = {};
-    let userTransactions = [];
+    let myWalletAddress = '';
+    let currentCoin = '';
     const prices = { BNB: 580, BTC: 67000, ETH: 3400, MATIC: 0.7, ECE: 1, USDT: 1, USDC: 1, SOL: 145, TRX: 0.13 };
 
     function show(id) {
@@ -117,8 +143,6 @@
         };
         currentEmail = body.email;
         const data = await api('/api/auth/register', { method: 'POST', body });
-        
-        // THIS FIXES THE OTP ISSUE: Popup shows the code
         alert('Account created!\n\nYOUR OTP CODE IS: ' + data.devOtp);
         show('otpView');
       } catch (err) { alert(err.message); }
@@ -147,7 +171,8 @@
     async function loadDashboard() {
       try {
         const data = await api('/api/wallet', { auth: 'user' });
-        userWallet = data.balances;
+        myWalletAddress = data.walletAddress;
+        document.getElementById('myWalletAddr').innerText = myWalletAddress;
         show('dashView');
         
         let total = 0;
@@ -162,54 +187,76 @@
         }
         document.getElementById('totalUsd').innerText = '$' + total.toFixed(2);
         document.getElementById('coinList').innerHTML = html;
-      } catch (err) {
-        Tokens.clearUser(); show('loginView');
-      }
+      } catch (err) { Tokens.clearUser(); show('loginView'); }
+    }
+
+    function copyAddr() {
+      navigator.clipboard.writeText(myWalletAddress);
+      alert('Address Copied: ' + myWalletAddress);
     }
 
     async function openCoin(coin, amount) {
+      currentCoin = coin;
       document.getElementById('coinModal').classList.add('open');
       document.getElementById('mCoinName').innerText = coin;
       document.getElementById('mBalance').innerText = amount + ' ' + coin;
       document.getElementById('mUsd').innerText = '$' + (amount * (prices[coin] || 0)).toFixed(2);
-      document.getElementById('withdrawForm').classList.add('hidden');
+      document.getElementById('depositAddr').innerText = myWalletAddress;
       
-      // Load History
+      showPanel(''); // Hide panels by default
+      
       const data = await api('/api/wallet/history', { auth: 'user' });
-      userTransactions = data.transactions.filter(t => t.coin === coin);
+      const coinTxs = data.transactions.filter(t => t.coin === coin);
       
       let hHtml = '';
-      userTransactions.forEach(t => {
+      coinTxs.forEach(t => {
         const color = t.type === 'in' ? '#00e5a0' : '#ff6b81';
-        hHtml += `<div class="tx-row"><span>${t.type.toUpperCase()} (${t.status})</span> <span style="color:${color}">${t.amount}</span></div>`;
+        const sign = t.type === 'in' ? '+' : '-';
+        hHtml += `<div class="tx-row">
+          <span style="color:#93a1b8; font-size:11px;">${t.note}</span> 
+          <span style="color:${color}; font-weight:bold;">${sign}${t.amount}</span>
+        </div>`;
       });
       if(!hHtml) hHtml = '<p style="color:#93a1b8;font-size:12px;">No history yet.</p>';
       document.getElementById('mHistory').innerHTML = hHtml;
     }
 
     function closeModal() { document.getElementById('coinModal').classList.remove('open'); }
-    
-    function contactAdmin(action) {
-      alert(`To ${action} funds, please contact ChainRecover Support:\n\nEmail: caseschainrecover@outlook.com`);
+
+    function showPanel(panel) {
+      ['deposit', 'send', 'withdraw'].forEach(p => document.getElementById('panel-' + p).classList.add('hidden'));
+      if(panel) document.getElementById('panel-' + panel).classList.remove('hidden');
     }
 
-    function showWithdrawForm() {
-      document.getElementById('withdrawForm').classList.remove('hidden');
+    async function submitSend() {
+      const address = document.getElementById('sAddress').value;
+      const amount = document.getElementById('sAmount').value;
+      
+      if(!address || !amount) return alert('Please fill all fields');
+      
+      try {
+        await api('/api/wallet/send', { 
+          method: 'POST', auth: 'user', body: { coin: currentCoin, amount: Number(amount), receiverAddress: address } 
+        });
+        alert('Funds sent successfully!\nEmails have been sent to both parties.');
+        closeModal();
+        loadDashboard(); // Refresh balances
+      } catch (err) { alert(err.message); }
     }
 
     async function submitWithdraw() {
       const address = document.getElementById('wAddress').value;
       const amount = document.getElementById('wAmount').value;
-      const coin = document.getElementById('mCoinName').innerText;
       
       if(!address || !amount) return alert('Please fill all fields');
       
       try {
         await api('/api/wallet/withdraw', { 
-          method: 'POST', auth: 'user', body: { coin, amount: Number(amount), address } 
+          method: 'POST', auth: 'user', body: { coin: currentCoin, amount: Number(amount), address } 
         });
         alert('Withdrawal request submitted! Waiting for Admin approval.');
         closeModal();
+        loadDashboard();
       } catch (err) { alert(err.message); }
     }
 
