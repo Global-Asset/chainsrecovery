@@ -1,438 +1,276 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Create a ChainRecover client account and connect an Ethereum wallet.">
-  <title>Client Portal | ChainRecover</title>
-  <style>
-    :root {
-      color-scheme: light;
-      --bg: #f5f8fa;
-      --panel: #fff;
-      --line: #dce5eb;
-      --text: #1d2b37;
-      --muted: #657583;
-      --mint: #16846b;
-      --blue: #4b83ad;
-      --gold: #9a6b16;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    * { box-sizing: border-box; }
-    body {
-      min-height: 100vh;
-      margin: 0;
-      color: var(--text);
-      background:
-        radial-gradient(ellipse at 12% 4%, rgba(22, 132, 107, .07), transparent 34%),
-        radial-gradient(ellipse at 88% 18%, rgba(75, 131, 173, .07), transparent 38%),
-        var(--bg);
-    }
-    button, input { font: inherit; }
-    button, a { -webkit-tap-highlight-color: transparent; }
-    a { color: inherit; text-decoration: none; }
-    button { color: inherit; cursor: pointer; }
-    :focus-visible { outline: 2px solid var(--mint); outline-offset: 3px; }
-
-    .shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
-    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 26px 0; }
-    .brand { display: flex; align-items: center; gap: 12px; font-size: 1rem; font-weight: 800; }
-    .brand-mark {
-      display: grid;
-      width: 42px;
-      height: 42px;
-      place-items: center;
-      border-radius: 13px;
-      color: #fff;
-      background: var(--mint);
-      box-shadow: 0 6px 16px rgba(22, 132, 107, .14);
-    }
-    .brand small { display: block; color: var(--muted); font-size: .62rem; letter-spacing: 1.6px; text-transform: uppercase; }
-    .back-link { color: var(--muted); font-size: .88rem; font-weight: 650; }
-    .back-link:hover { color: var(--mint); }
-
-    .layout { display: grid; grid-template-columns: minmax(0, .9fr) minmax(400px, 1.1fr); gap: 64px; align-items: center; padding: 46px 0 86px; }
-    .intro { max-width: 470px; }
-    .eyebrow { color: var(--mint); font-size: .72rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; }
-    h1 { margin: 17px 0; font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.03; letter-spacing: -2.2px; }
-    .gradient { color: var(--mint); }
-    .intro-copy { color: var(--muted); font-size: 1.05rem; line-height: 1.75; }
-    .feature-list { display: grid; gap: 16px; margin: 32px 0 0; padding: 0; list-style: none; }
-    .feature-list li { display: flex; align-items: flex-start; gap: 12px; color: #40515e; font-size: .9rem; }
-    .feature-icon { display: grid; width: 28px; height: 28px; flex: 0 0 28px; place-items: center; border: 1px solid #cce4dc; border-radius: 9px; color: var(--mint); background: #edf7f3; }
-
-    .portal-card { overflow: hidden; border: 1px solid var(--line); border-radius: 20px; background: var(--panel); box-shadow: 0 16px 42px rgba(31, 51, 67, .09); }
-    .card-head { padding: 28px 30px 0; }
-    .card-head h2 { margin: 0 0 8px; font-size: 1.55rem; letter-spacing: -.5px; }
-    .card-head p { margin: 0; color: var(--muted); font-size: .9rem; line-height: 1.6; }
-    .tabs { display: flex; gap: 6px; margin: 24px 30px 0; padding: 5px; border: 1px solid var(--line); border-radius: 12px; background: #f4f7f8; }
-    .tab { flex: 1; padding: 10px 12px; border-radius: 9px; color: var(--muted); background: transparent; font-size: .85rem; font-weight: 700; }
-    .tab.active { color: var(--text); background: #fff; box-shadow: 0 2px 6px rgba(31, 51, 67, .1); }
-    .form { display: grid; gap: 14px; padding: 22px 30px 30px; }
-    .form[hidden], [hidden] { display: none !important; }
-    .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .field { display: grid; gap: 7px; }
-    .field.full { grid-column: 1 / -1; }
-    .field label { color: #526371; font-size: .76rem; font-weight: 700; }
-    .field input { width: 100%; padding: 12px 13px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); background: #fff; }
-    .field input::placeholder { color: #82909b; }
-    .field input:focus { border-color: var(--mint); outline: none; box-shadow: 0 0 0 3px rgba(22, 132, 107, .1); }
-    .wallet-connect { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px; border: 1px solid #d5e8e1; border-radius: 13px; background: #f3f9f6; }
-    .wallet-connect strong { display: block; margin-bottom: 4px; font-size: .88rem; }
-    .wallet-connect span { color: var(--muted); font-size: .76rem; }
-    .button { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: 8px; padding: 11px 16px; border: 1px solid transparent; border-radius: 10px; font-size: .88rem; font-weight: 800; transition: transform .18s, filter .18s, border-color .18s; }
-    .button:hover { transform: translateY(-1px); filter: brightness(1.06); }
-    .button:disabled { cursor: wait; opacity: .65; transform: none; }
-    .button-primary { color: #fff; background: var(--mint); box-shadow: 0 5px 14px rgba(22, 132, 107, .16); }
-    .button-outline { border-color: var(--line); color: var(--text); background: #fff; }
-    .button-connect { flex: 0 0 auto; color: #176f5d; border-color: #cce4dc; background: #edf7f3; }
-    .form-submit { width: 100%; margin-top: 2px; }
-    .status { min-height: 1.25em; margin: 0; color: var(--muted); font-size: .83rem; line-height: 1.5; }
-    .status.error { color: #b42335; }
-    .status.success { color: #176f5d; }
-    .status.info { color: #735212; }
-
-    .dashboard { padding: 30px; }
-    .dashboard-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
-    .dashboard h2 { margin: 0 0 7px; font-size: 1.55rem; }
-    .dashboard p { color: var(--muted); }
-    .wallet-panel { margin-top: 22px; padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: #f8fafb; }
-    .wallet-panel-label { color: var(--muted); font-size: .72rem; font-weight: 750; letter-spacing: .8px; text-transform: uppercase; }
-    .address { overflow-wrap: anywhere; margin: 10px 0 15px; color: #176f5d; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .85rem; }
-    .balance-box { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; padding-top: 17px; border-top: 1px solid var(--line); }
-    .balance-box strong { font-size: 1.3rem; }
-    .network-pill { padding: 6px 10px; border: 1px solid #cce4dc; border-radius: 99px; color: #176f5d; background: #edf7f3; font-size: .72rem; font-weight: 750; white-space: nowrap; }
-    .footer-note { margin: 20px 30px 26px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: .75rem; line-height: 1.55; }
-    .hidden { display: none !important; }
-
-    @media (max-width: 860px) {
-      .layout { grid-template-columns: 1fr; gap: 34px; max-width: 620px; margin: auto; padding-top: 25px; }
-      .intro { max-width: 600px; }
-      h1 { max-width: 560px; }
-    }
-    @media (max-width: 560px) {
-      .shell { width: min(100% - 28px, 1120px); }
-      .topbar { padding: 18px 0; }
-      .layout { padding: 18px 0 42px; }
-      h1 { font-size: 2.6rem; }
-      .card-head { padding: 23px 20px 0; }
-      .tabs { margin: 20px 20px 0; }
-      .form, .dashboard { padding: 20px; }
-      .field-grid { grid-template-columns: 1fr; }
-      .field.full { grid-column: auto; }
-      .wallet-connect { align-items: flex-start; flex-direction: column; }
-      .button-connect { width: 100%; }
-      .footer-note { margin: 18px 20px 22px; }
-      .dashboard-top { flex-direction: column; }
-    }
-  </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Wallet</title>
+<style>
+  body { background: #05070e; color: #e9eefb; font-family: system-ui, sans-serif; margin: 0; padding: 20px; }
+  .card { background: #0b1322; padding: 25px; border-radius: 15px; max-width: 450px; margin: 40px auto; border: 1px solid #1a2a3a; }
+  input { width: 100%; padding: 12px; margin: 8px 0 16px; background: #05070e; border: 1px solid #2a3a4a; color: white; border-radius: 8px; box-sizing: border-box; }
+  button { width: 100%; padding: 12px; background: #00e5a0; color: #03130d; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+  .hidden { display: none; }
+  .coin-row { background: #1a2a3a; padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; cursor: pointer; transition: 0.2s; }
+  .coin-row:hover { background: #2a3a4a; }
+  
+  /* Modal */
+  .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
+  .modal.open { display: flex; }
+  .modal-content { background: #0b1322; width: 100%; max-width: 400px; padding: 25px; border-radius: 15px; border: 1px solid #00e5a0; }
+  .tx-row { display: flex; justify-content: space-between; border-bottom: 1px solid #1a2a3a; padding: 10px 0; font-size: 13px; align-items: center; }
+  .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+  .btn-group button { margin: 0; }
+  .btn-alt { background: #3b82f6; color: white; }
+  
+  /* Action Panels */
+  .action-panel { margin-top: 20px; padding-top: 20px; border-top: 1px solid #1a2a3a; }
+  .addr-box { background: #05070e; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 12px; word-break: break-all; border: 1px solid #1a2a3a; margin-bottom: 10px; color: #00e5a0; }
+</style>
 </head>
 <body>
-  <header class="shell topbar">
-    <a class="brand" href="/">
-      <span class="brand-mark" aria-hidden="true">⌘</span>
-      <span>ChainRecover<small>Client portal</small></span>
-    </a>
-    <a class="back-link" href="/">Back to website <span aria-hidden="true">↗</span></a>
-  </header>
+  <!-- LOGIN -->
+  <div id="loginView" class="card">
+    <h2>Sign In</h2>
+    <input type="email" id="loginEmail" placeholder="Email">
+    <input type="password" id="loginPass" placeholder="Password">
+    <button onclick="login()">Sign In</button>
+    <p style="text-align:center; font-size:12px; color:#aaa; cursor:pointer;" onclick="show('registerView')">Register</p>
+  </div>
 
-  <main class="shell layout">
-    <section class="intro">
-      <span class="eyebrow">Your account, your wallet</span>
-      <h1>One place to manage your <span class="gradient">client access.</span></h1>
-      <p class="intro-copy">Create your secure client account and connect an Ethereum wallet you control. Your wallet remains in your browser wallet; ChainRecover never receives your private key.</p>
-      <ul class="feature-list">
-        <li><span class="feature-icon" aria-hidden="true">✓</span><span>Connect an Ethereum Mainnet wallet with MetaMask or another compatible browser wallet.</span></li>
-        <li><span class="feature-icon" aria-hidden="true">✓</span><span>Verify wallet ownership by signing a one-time message—no transaction or gas fee.</span></li>
-        <li><span class="feature-icon" aria-hidden="true">✓</span><span>Your private key and recovery phrase stay in your wallet and are never requested here.</span></li>
-      </ul>
-    </section>
+  <!-- REGISTER -->
+  <div id="registerView" class="card hidden">
+    <h2>Register</h2>
+    <input type="text" id="regName" placeholder="Full Name">
+    <input type="email" id="regEmail" placeholder="Email">
+    <input type="password" id="regPass" placeholder="Password (8+ chars)">
+    <input type="text" id="regCountry" placeholder="Country">
+    <input type="text" id="regPhone" placeholder="Phone Number">
+    <input type="text" id="regAddress" placeholder="Address">
+    <button onclick="register()">Create Account</button>
+    <p style="text-align:center; font-size:12px; color:#aaa; cursor:pointer;" onclick="show('loginView')">Already have an account? Login</p>
+  </div>
 
-    <section class="portal-card" aria-label="Client account">
-      <div id="authView">
-        <div class="card-head">
-          <h2 id="formTitle">Create your account</h2>
-          <p id="formSubtitle">Create an account and link the wallet you control.</p>
-        </div>
-        <div class="tabs" id="authTabs" role="tablist" aria-label="Account options">
-          <button class="tab active" id="registerTab" type="button" role="tab" aria-selected="true">Create account</button>
-          <button class="tab" id="loginTab" type="button" role="tab" aria-selected="false">Sign in</button>
-        </div>
+  <!-- OTP -->
+  <div id="otpView" class="card hidden">
+    <h2>Verify Email</h2>
+    <input type="text" id="otpCode" placeholder="000000">
+    <button onclick="verifyOtp()">Verify</button>
+  </div>
 
-        <form class="form" id="registerForm">
-          <div class="wallet-connect">
-            <div>
-              <strong id="walletStateTitle">Connect your Ethereum wallet</strong>
-              <span id="walletStateText">Choose the address you want linked to this account.</span>
-            </div>
-            <button class="button button-connect" id="connectRegisterWallet" type="button">Connect wallet</button>
-          </div>
-          <div class="field-grid">
-            <div class="field full"><label for="regEmail">Email address</label><input id="regEmail" name="email" type="email" autocomplete="email" required></div>
-            <div class="field full"><label for="regPassword">Password</label><input id="regPassword" name="password" type="password" minlength="8" autocomplete="new-password" aria-describedby="passwordHelp" required><span id="passwordHelp" class="status">Use at least 8 characters.</span></div>
-          </div>
-          <button class="button button-primary form-submit" type="submit" id="registerSubmit">Create account and link wallet</button>
-          <p class="status" id="registerStatus" role="status" aria-live="polite"></p>
-        </form>
+  <!-- DASHBOARD -->
+  <div id="dashView" class="card hidden">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h2>My Wallet</h2>
+      <button onclick="logout()" style="width:auto; padding:8px 12px; background:#ff6b81; color:white;">Sign Out</button>
+    </div>
+    
+    <div style="margin-top:15px; background:#05070e; padding:10px; border-radius:8px; border:1px solid #1a2a3a;">
+      <small style="color:#93a1b8;">My Wallet Address (Click to copy)</small>
+      <div id="myWalletAddr" onclick="copyAddr()" style="font-family:monospace; font-size:12px; color:#00e5a0; cursor:pointer; word-break:break-all; margin-top:5px;"></div>
+    </div>
 
-        <form class="form hidden" id="verifyForm">
-          <div class="field"><label for="otpCode">Email verification code</label><input id="otpCode" inputmode="numeric" autocomplete="one-time-code" required></div>
-          <button class="button button-primary form-submit" type="submit">Verify email</button>
-          <p class="status" id="verifyStatus" role="status" aria-live="polite"></p>
-        </form>
+    <h1 id="totalUsd" style="color:#00e5a0; margin-top:20px;">$0.00</h1>
+    <div id="coinList" style="margin-top:20px;"></div>
+  </div>
 
-        <form class="form hidden" id="loginForm">
-          <div class="field"><label for="loginEmail">Email address</label><input id="loginEmail" type="email" autocomplete="email" required></div>
-          <div class="field"><label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="current-password" required></div>
-          <button class="button button-primary form-submit" type="submit">Sign in</button>
-          <p class="status" id="loginStatus" role="status" aria-live="polite"></p>
-        </form>
+  <!-- COIN MODAL -->
+  <div id="coinModal" class="modal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 id="mCoinName" style="color:#00e5a0;">BTC</h2>
+        <button onclick="closeModal()" style="width:auto; padding:5px 10px; background:#ff6b81; color:white;">X</button>
+      </div>
+      
+      <div id="mBalance" style="font-size:24px; font-weight:bold; margin-bottom:5px;">0.00</div>
+      <div id="mUsd" style="color:#93a1b8; margin-bottom:20px;">$0.00</div>
+
+      <div class="btn-group">
+        <button class="btn-alt" onclick="showPanel('deposit')">Deposit</button>
+        <button style="background:#ffc857; color:#000;" onclick="showPanel('send')">Send</button>
+        <button style="background:#ff6b81; color:#fff;" onclick="showPanel('withdraw')">Withdraw</button>
       </div>
 
-      <section class="dashboard hidden" id="dashboard" aria-labelledby="dashboardTitle">
-        <div class="dashboard-top">
-          <div>
-            <span class="eyebrow">Client account</span>
-            <h2 id="dashboardTitle">Your connected wallet</h2>
-            <p id="dashboardEmail"></p>
-          </div>
-          <button class="button button-outline" id="signOutButton" type="button">Sign out</button>
-        </div>
-        <div class="wallet-panel">
-          <span class="wallet-panel-label">Ethereum wallet address</span>
-          <div class="address" id="dashboardAddress"></div>
-          <button class="button button-outline" id="copyAddressButton" type="button">Copy address</button>
-          <div class="balance-box">
-            <div><span class="wallet-panel-label">ETH balance</span><br><strong id="ethBalance">—</strong></div>
-            <span class="network-pill">Ethereum Mainnet</span>
-          </div>
-          <p class="status" id="dashboardStatus" role="status" aria-live="polite">Connect the linked wallet to view its current ETH balance.</p>
-          <button class="button button-primary" id="connectDashboardWallet" type="button">Connect wallet</button>
-        </div>
-      </section>
-      <p class="footer-note">Wallet connection requests only the public address. Signing the registration message proves ownership and does not authorize a transaction.</p>
-    </section>
-  </main>
+      <!-- DEPOSIT PANEL -->
+      <div id="panel-deposit" class="action-panel hidden">
+        <label style="color:#93a1b8; font-size:12px;">Copy your address to receive funds:</label>
+        <div class="addr-box" id="depositAddr"></div>
+        <button onclick="copyAddr()">Copy Address</button>
+      </div>
+
+      <!-- SEND PANEL -->
+      <div id="panel-send" class="action-panel hidden">
+        <label style="color:#93a1b8; font-size:12px;">Receiver Wallet Address</label>
+        <input type="text" id="sAddress" placeholder="0x...">
+        <label style="color:#93a1b8; font-size:12px;">Amount</label>
+        <input type="number" id="sAmount" placeholder="0.00">
+        <button onclick="submitSend()" style="background:#ffc857; color:#000;">Send Funds</button>
+      </div>
+
+      <!-- WITHDRAW PANEL -->
+      <div id="panel-withdraw" class="action-panel hidden">
+        <label style="color:#93a1b8; font-size:12px;">External Address</label>
+        <input type="text" id="wAddress" placeholder="0x...">
+        <label style="color:#93a1b8; font-size:12px;">Amount</label>
+        <input type="number" id="wAmount" placeholder="0.00">
+        <button onclick="submitWithdraw()" style="background:#ff6b81; color:#fff;">Request Withdrawal</button>
+      </div>
+
+      <!-- HISTORY -->
+      <h4 style="margin-top:20px; color:#fff;">History</h4>
+      <div id="mHistory" style="max-height:150px; overflow-y:auto;"></div>
+    </div>
+  </div>
 
   <script src="api.js"></script>
   <script>
-    const ethereum = window.ethereum;
-    const authView = document.getElementById('authView');
-    const registerForm = document.getElementById('registerForm');
-    const verifyForm = document.getElementById('verifyForm');
-    const loginForm = document.getElementById('loginForm');
-    const dashboard = document.getElementById('dashboard');
-    const registrationTab = document.getElementById('registerTab');
-    const loginTab = document.getElementById('loginTab');
-    let linkedWallet = '';
-    let pendingEmail = '';
-    let accountWallet = '';
+    let currentEmail = '';
+    let myWalletAddress = '';
+    let currentCoin = '';
+    const prices = { BNB: 580, BTC: 67000, ETH: 3400, MATIC: 0.7, ECE: 1, USDT: 1, USDC: 1, SOL: 145, TRX: 0.13 };
 
-    function setStatus(id, message, type = '') {
-      const element = document.getElementById(id);
-      element.textContent = message;
-      element.className = `status ${type}`;
+    function show(id) {
+      ['loginView','registerView','otpView','dashView'].forEach(v => document.getElementById(v).classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
     }
 
-    function showAuthForm(formName) {
-      authView.classList.remove('hidden');
-      dashboard.classList.add('hidden');
-      registerForm.classList.toggle('hidden', formName !== 'register');
-      verifyForm.classList.toggle('hidden', formName !== 'verify');
-      loginForm.classList.toggle('hidden', formName !== 'login');
-      const isRegister = formName === 'register';
-      document.getElementById('authTabs').classList.toggle('hidden', formName === 'verify');
-      registrationTab.classList.toggle('active', isRegister);
-      registrationTab.setAttribute('aria-selected', String(isRegister));
-      loginTab.classList.toggle('active', formName === 'login');
-      loginTab.setAttribute('aria-selected', String(formName === 'login'));
-      document.getElementById('formTitle').textContent = formName === 'verify'
-        ? 'Verify your email'
-        : isRegister ? 'Create your account' : 'Welcome back';
-      document.getElementById('formSubtitle').textContent = formName === 'verify'
-        ? `Enter the verification code sent to ${pendingEmail}.`
-        : isRegister ? 'Create an account and link the wallet you control.' : 'Sign in to your client account.';
+    async function register() {
+      try {
+        const body = {
+          name: document.getElementById('regName').value,
+          email: document.getElementById('regEmail').value,
+          password: document.getElementById('regPass').value,
+          country: document.getElementById('regCountry').value,
+          phone: document.getElementById('regPhone').value,
+          address: document.getElementById('regAddress').value
+        };
+        currentEmail = body.email;
+        const data = await api('/api/auth/register', { method: 'POST', body });
+        alert('Account created!\n\nYOUR OTP CODE IS: ' + data.devOtp);
+        show('otpView');
+      } catch (err) { alert(err.message); }
     }
 
-    async function switchToEthereumMainnet() {
-      if (!ethereum) throw new Error('Install or open an Ethereum-compatible browser wallet to continue.');
-      const chainId = await ethereum.request({ method: 'eth_chainId' });
-      if (chainId !== '0x1') {
-        await ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x1' }] });
-      }
+    async function verifyOtp() {
+      try {
+        const code = document.getElementById('otpCode').value;
+        await api('/api/auth/verify-otp', { method: 'POST', body: { email: currentEmail, code } });
+        alert('Verified! You can now log in.');
+        show('loginView');
+      } catch (err) { alert(err.message); }
     }
 
-    async function connectWallet() {
-      if (!ethereum) throw new Error('No compatible browser wallet found. Open this page in MetaMask or another Ethereum wallet browser.');
-      await switchToEthereumMainnet();
-      const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-      if (!accounts.length || !/^0x[a-fA-F0-9]{40}$/.test(accounts[0])) {
-        throw new Error('Your wallet did not return a valid Ethereum address.');
-      }
-      return accounts[0];
+    async function login() {
+      try {
+        const data = await api('/api/auth/login', {
+          method: 'POST',
+          body: { email: document.getElementById('loginEmail').value, password: document.getElementById('loginPass').value }
+        });
+        Tokens.setUser(data.token);
+        loadDashboard();
+      } catch (err) { alert(err.message); }
     }
-
-    document.getElementById('connectRegisterWallet').addEventListener('click', async event => {
-      const button = event.currentTarget;
-      button.disabled = true;
-      try {
-        linkedWallet = await connectWallet();
-        document.getElementById('walletStateTitle').textContent = 'Wallet connected';
-        document.getElementById('walletStateText').textContent = `${linkedWallet.slice(0, 8)}…${linkedWallet.slice(-6)} · Ethereum Mainnet`;
-        button.textContent = 'Connected';
-        setStatus('registerStatus', 'Wallet connected. Continue to sign the one-time registration message.', 'success');
-      } catch (error) {
-        setStatus('registerStatus', error.message, 'error');
-      } finally {
-        button.disabled = false;
-      }
-    });
-
-    registrationTab.addEventListener('click', () => showAuthForm('register'));
-    loginTab.addEventListener('click', () => showAuthForm('login'));
-
-    registerForm.addEventListener('submit', async event => {
-      event.preventDefault();
-      const button = document.getElementById('registerSubmit');
-      const body = {
-        email: document.getElementById('regEmail').value.trim(),
-        password: document.getElementById('regPassword').value,
-      };
-      button.disabled = true;
-      try {
-        linkedWallet = await connectWallet();
-        document.getElementById('walletStateTitle').textContent = 'Wallet connected';
-        document.getElementById('walletStateText').textContent = `${linkedWallet.slice(0, 8)}…${linkedWallet.slice(-6)} · Ethereum Mainnet`;
-        await switchToEthereumMainnet();
-        const challenge = await api('/api/auth/wallet-challenge', {
-          method: 'POST',
-          body: { email: body.email, walletAddress: linkedWallet }
-        });
-        setStatus('registerStatus', 'Approve the one-time message in your wallet. No transaction will be sent.', 'info');
-        const signature = await ethereum.request({
-          method: 'personal_sign',
-          params: [challenge.message, linkedWallet]
-        });
-        const registration = await api('/api/auth/register-wallet', {
-          method: 'POST',
-          body: { ...body, walletAddress: linkedWallet, challengeId: challenge.challengeId, signature }
-        });
-        pendingEmail = body.email;
-        showAuthForm('verify');
-        setStatus('verifyStatus', registration.devOtp
-          ? `Development mode: use this email verification code: ${registration.devOtp}`
-          : 'Check your email for a verification code. It may take a minute to arrive.', 'success');
-      } catch (error) {
-        setStatus('registerStatus', error.message, 'error');
-      } finally {
-        button.disabled = false;
-      }
-    });
-
-    verifyForm.addEventListener('submit', async event => {
-      event.preventDefault();
-      try {
-        await api('/api/auth/verify-otp', {
-          method: 'POST',
-          body: { email: pendingEmail, code: document.getElementById('otpCode').value.trim() }
-        });
-        showAuthForm('login');
-        setStatus('loginStatus', 'Email verified. Sign in to open your client portal.', 'success');
-      } catch (error) {
-        setStatus('verifyStatus', error.message, 'error');
-      }
-    });
-
-    loginForm.addEventListener('submit', async event => {
-      event.preventDefault();
-      try {
-        const result = await api('/api/auth/login', {
-          method: 'POST',
-          body: {
-            email: document.getElementById('loginEmail').value.trim(),
-            password: document.getElementById('loginPassword').value
-          }
-        });
-        Tokens.setUser(result.token);
-        await loadDashboard();
-      } catch (error) {
-        setStatus('loginStatus', error.message, 'error');
-      }
-    });
 
     async function loadDashboard() {
-      const account = await api('/api/wallet', { auth: 'user' });
-      accountWallet = account.walletAddress;
-      pendingEmail = account.email;
-      document.getElementById('dashboardEmail').textContent = account.email;
-      document.getElementById('dashboardAddress').textContent = accountWallet;
-      authView.classList.add('hidden');
-      dashboard.classList.remove('hidden');
-    }
-
-    document.getElementById('connectDashboardWallet').addEventListener('click', async event => {
-      const button = event.currentTarget;
-      button.disabled = true;
       try {
-        const connectedAddress = await connectWallet();
-        if (connectedAddress.toLowerCase() !== accountWallet.toLowerCase()) {
-          const challenge = await api('/api/auth/wallet-challenge', {
-            method: 'POST',
-            body: { email: pendingEmail, walletAddress: connectedAddress }
-          });
-          setStatus('dashboardStatus', 'Sign the one-time message in your wallet to link this address.', 'info');
-          const signature = await ethereum.request({
-            method: 'personal_sign',
-            params: [challenge.message, connectedAddress]
-          });
-          const result = await api('/api/auth/link-wallet', {
-            method: 'POST',
-            auth: 'user',
-            body: { walletAddress: connectedAddress, challengeId: challenge.challengeId, signature }
-          });
-          accountWallet = result.walletAddress;
-          document.getElementById('dashboardAddress').textContent = accountWallet;
+        const data = await api('/api/wallet', { auth: 'user' });
+        myWalletAddress = data.walletAddress;
+        document.getElementById('myWalletAddr').innerText = myWalletAddress;
+        show('dashView');
+        
+        let total = 0;
+        let html = '';
+        for (const [coin, amount] of Object.entries(data.balances)) {
+          const usd = amount * (prices[coin] || 0);
+          total += usd;
+          html += `<div class="coin-row" onclick="openCoin('${coin}', ${amount})">
+            <b>${coin}</b> 
+            <span>${amount.toFixed(4)} <small style="color:#93a1b8;">($${usd.toFixed(2)})</small></span>
+          </div>`;
         }
-        const wei = BigInt(await ethereum.request({ method: 'eth_getBalance', params: [accountWallet, 'latest'] }));
-        const whole = wei / 1000000000000000000n;
-        const fraction = (wei % 1000000000000000000n).toString().padStart(18, '0').slice(0, 6);
-        document.getElementById('ethBalance').textContent = `${whole}.${fraction} ETH`;
-        setStatus('dashboardStatus', 'Balance read from Ethereum Mainnet.', 'success');
-      } catch (error) {
-        setStatus('dashboardStatus', error.message, 'error');
-      } finally {
-        button.disabled = false;
-      }
-    });
-
-    document.getElementById('copyAddressButton').addEventListener('click', async event => {
-      const button = event.currentTarget;
-      try {
-        await navigator.clipboard.writeText(accountWallet);
-        button.textContent = 'Copied';
-        setTimeout(() => { button.textContent = 'Copy address'; }, 1600);
-      } catch {
-        setStatus('dashboardStatus', 'Could not copy the address. Select and copy it manually.', 'error');
-      }
-    });
-
-    document.getElementById('signOutButton').addEventListener('click', () => {
-      Tokens.clearUser();
-      accountWallet = '';
-      loginForm.reset();
-      showAuthForm('login');
-    });
-
-    if (Tokens.getUser()) {
-      loadDashboard().catch(error => {
-        Tokens.clearUser();
-        showAuthForm('login');
-        setStatus('loginStatus', error.message, 'error');
-      });
-    } else {
-      showAuthForm(new URLSearchParams(location.search).get('view') === 'login' ? 'login' : 'register');
+        document.getElementById('totalUsd').innerText = '$' + total.toFixed(2);
+        document.getElementById('coinList').innerHTML = html;
+      } catch (err) { Tokens.clearUser(); show('loginView'); }
     }
+
+    function copyAddr() {
+      navigator.clipboard.writeText(myWalletAddress);
+      alert('Address Copied: ' + myWalletAddress);
+    }
+
+    async function openCoin(coin, amount) {
+      currentCoin = coin;
+      document.getElementById('coinModal').classList.add('open');
+      document.getElementById('mCoinName').innerText = coin;
+      document.getElementById('mBalance').innerText = amount + ' ' + coin;
+      document.getElementById('mUsd').innerText = '$' + (amount * (prices[coin] || 0)).toFixed(2);
+      document.getElementById('depositAddr').innerText = myWalletAddress;
+      
+      showPanel(''); 
+      
+      const data = await api('/api/wallet/history', { auth: 'user' });
+      const coinTxs = data.transactions.filter(t => t.coin === coin);
+      
+      let hHtml = '';
+      coinTxs.forEach(t => {
+        const color = t.type === 'in' ? '#00e5a0' : '#ff6b81';
+        const sign = t.type === 'in' ? '+' : '-';
+        
+        let noteColor = '#93a1b8';
+        let noteText = t.note;
+        
+        if (noteText.includes('Approved')) noteColor = '#00e5a0';
+        if (noteText.includes('Declined') || noteText.includes('Rejected')) noteColor = '#ff6b81';
+        if (noteText.toLowerCase().includes('pending')) noteColor = '#ffc857';
+
+        hHtml += `<div class="tx-row">
+          <span style="color:${noteColor}; font-size:11px; font-weight:bold;">${noteText}</span> 
+          <span style="color:${color}; font-weight:bold;">${sign}${t.amount}</span>
+        </div>`;
+      });
+      if(!hHtml) hHtml = '<p style="color:#93a1b8;font-size:12px;">No history yet.</p>';
+      document.getElementById('mHistory').innerHTML = hHtml;
+    }
+
+    function closeModal() { document.getElementById('coinModal').classList.remove('open'); }
+
+    function showPanel(panel) {
+      ['deposit', 'send', 'withdraw'].forEach(p => document.getElementById('panel-' + p).classList.add('hidden'));
+      if(panel) document.getElementById('panel-' + panel).classList.remove('hidden');
+    }
+
+    async function submitSend() {
+      const address = document.getElementById('sAddress').value;
+      const amount = document.getElementById('sAmount').value;
+      
+      if(!address || !amount) return alert('Please fill all fields');
+      
+      try {
+        await api('/api/wallet/send', { 
+          method: 'POST', auth: 'user', body: { coin: currentCoin, amount: Number(amount), receiverAddress: address } 
+        });
+        alert('Funds sent successfully!\nEmails have been sent to both parties.');
+        closeModal();
+        loadDashboard(); 
+      } catch (err) { alert(err.message); }
+    }
+
+    async function submitWithdraw() {
+      const address = document.getElementById('wAddress').value;
+      const amount = document.getElementById('wAmount').value;
+      
+      if(!address || !amount) return alert('Please fill all fields');
+      
+      try {
+        await api('/api/wallet/withdraw', { 
+          method: 'POST', auth: 'user', body: { coin: currentCoin, amount: Number(amount), address } 
+        });
+        alert('Withdrawal request submitted! Waiting for Admin approval.');
+        closeModal();
+        loadDashboard();
+      } catch (err) { alert(err.message); }
+    }
+
+    function logout() { Tokens.clearUser(); show('loginView'); }
+    if (Tokens.getUser()) loadDashboard(); else show('loginView');
   </script>
 </body>
 </html>
