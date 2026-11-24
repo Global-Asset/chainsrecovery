@@ -1,7 +1,8 @@
-FROM node:18-alpine
+FROM node:22-bookworm-slim
 WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
+COPY backend/package*.json ./
+RUN npm ci
+COPY backend/ ./
+ENV NODE_ENV=production
 EXPOSE 4000
 CMD ["npm", "start"]
