@@ -12,15 +12,16 @@
   .coin-row { background: #1a2a3a; padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; cursor: pointer; transition: 0.2s; }
   .coin-row:hover { background: #2a3a4a; }
   
+  /* Modal */
   .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
   .modal.open { display: flex; }
   .modal-content { background: #0b1322; width: 100%; max-width: 400px; padding: 25px; border-radius: 15px; border: 1px solid #00e5a0; }
-  .tx-row { display: flex; justify-content: space-between; border-bottom: 1px solid #1a2a3a; padding: 10px 0; font-size: 13px; }
+  .tx-row { display: flex; justify-content: space-between; border-bottom: 1px solid #1a2a3a; padding: 10px 0; font-size: 13px; align-items: center; }
   .btn-group { display: flex; gap: 10px; margin-top: 15px; }
   .btn-group button { margin: 0; }
   .btn-alt { background: #3b82f6; color: white; }
   
-  /* Action Panels inside Modal */
+  /* Action Panels */
   .action-panel { margin-top: 20px; padding-top: 20px; border-top: 1px solid #1a2a3a; }
   .addr-box { background: #05070e; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 12px; word-break: break-all; border: 1px solid #1a2a3a; margin-bottom: 10px; color: #00e5a0; }
 </style>
@@ -88,14 +89,12 @@
         <button style="background:#ff6b81; color:#fff;" onclick="showPanel('withdraw')">Withdraw</button>
       </div>
 
-      <!-- DEPOSIT PANEL -->
       <div id="panel-deposit" class="action-panel hidden">
         <label style="color:#93a1b8; font-size:12px;">Copy your address to receive funds:</label>
         <div class="addr-box" id="depositAddr"></div>
         <button onclick="copyAddr()">Copy Address</button>
       </div>
 
-      <!-- SEND PANEL -->
       <div id="panel-send" class="action-panel hidden">
         <label style="color:#93a1b8; font-size:12px;">Receiver Wallet Address</label>
         <input type="text" id="sAddress" placeholder="0x...">
@@ -104,7 +103,6 @@
         <button onclick="submitSend()" style="background:#ffc857; color:#000;">Send Funds</button>
       </div>
 
-      <!-- WITHDRAW PANEL -->
       <div id="panel-withdraw" class="action-panel hidden">
         <label style="color:#93a1b8; font-size:12px;">External Address</label>
         <input type="text" id="wAddress" placeholder="0x...">
@@ -113,19 +111,17 @@
         <button onclick="submitWithdraw()" style="background:#ff6b81; color:#fff;">Request Withdrawal</button>
       </div>
 
-      <!-- HISTORY -->
-      <h4 style="margin-top:20px;">History</h4>
+      <h4 style="margin-top:20px; color:#fff;">History</h4>
       <div id="mHistory" style="max-height:150px; overflow-y:auto;"></div>
     </div>
   </div>
 
-  <script src="api.js"></script>
   <script>
-    let currentEmail = '';
-    let myWalletAddress = '';
-    let currentCoin = '';
+    const API_BASE = ''; 
+    
+    // FIXED: Moved prices outside so they can be accessed by openCoin()
     const prices = { BNB: 580, BTC: 67000, ETH: 3400, MATIC: 0.7, ECE: 1, USDT: 1, USDC: 1, SOL: 145, TRX: 0.13 };
-
+    
     function show(id) {
       ['loginView','registerView','otpView','dashView'].forEach(v => document.getElementById(v).classList.add('hidden'));
       document.getElementById(id).classList.remove('hidden');
@@ -133,53 +129,45 @@
 
     async function register() {
       try {
-        const body = {
-          name: document.getElementById('regName').value,
-          email: document.getElementById('regEmail').value.trim(),
-          password: document.getElementById('regPass').value,
-          country: document.getElementById('regCountry').value,
-          phone: document.getElementById('regPhone').value,
-          address: document.getElementById('regAddress').value
-        };
-        const ethereum = window.ethereum;
-        if (!ethereum) throw new Error('Open this page in MetaMask or another Ethereum-compatible wallet.');
-
-        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-        const walletAddress = accounts[0];
-        if (!walletAddress || !/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
-          throw new Error('Your wallet did not return a valid Ethereum address.');
-        }
-
-        const chainId = await ethereum.request({ method: 'eth_chainId' });
-        if (chainId !== '0x1') {
-          await ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x1' }] });
-        }
-
-        const challenge = await api('/api/auth/wallet-challenge', {
+        const res = await fetch('/api/auth/register', {
           method: 'POST',
-          body: { email: body.email, walletAddress }
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: document.getElementById('regName').value,
+            email: document.getElementById('regEmail').value,
+            password: document.getElementById('regPass').value,
+            country: document.getElementById('regCountry').value,
+            phone: document.getElementById('regPhone').value,
+            address: document.getElementById('regAddress').value
+          })
         });
-        const signature = await ethereum.request({
-          method: 'personal_sign',
-          params: [challenge.message, walletAddress]
-        });
-        const registration = await api('/api/auth/register-wallet', {
-          method: 'POST',
-          body: { ...body, walletAddress, challengeId: challenge.challengeId, signature }
-        });
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.error || 'Failed to register');
+        
+        // --- FIXED: Handle devOtp for testing ---
+        if (data.devOtp) {
+          alert(`Account created! Your TEST OTP is: ${data.devOtp}`);
+          document.getElementById('otpCode').value = data.devOtp; // Auto-fill
+        } else {
+          alert('Account created! Check your email for the OTP code.');
+        }
+        // ---------------------------------------
 
-        currentEmail = body.email;
-        alert(registration.devOtp
-          ? 'Account created!\n\nYOUR OTP CODE IS: ' + registration.devOtp
-          : 'Account created! Check your email for the verification code.');
         show('otpView');
+        window.currentEmail = document.getElementById('regEmail').value;
       } catch (err) { alert(err.message); }
     }
 
     async function verifyOtp() {
       try {
-        const code = document.getElementById('otpCode').value;
-        await api('/api/auth/verify-otp', { method: 'POST', body: { email: currentEmail, code } });
+        const res = await fetch('/api/auth/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: window.currentEmail, code: document.getElementById('otpCode').value })
+        });
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.error);
+        
         alert('Verified! You can now log in.');
         show('loginView');
       } catch (err) { alert(err.message); }
@@ -187,24 +175,35 @@
 
     async function login() {
       try {
-        const data = await api('/api/auth/login', {
+        const res = await fetch('/api/auth/login', {
           method: 'POST',
-          body: { email: document.getElementById('loginEmail').value, password: document.getElementById('loginPass').value }
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPass').value })
         });
-        Tokens.setUser(data.token);
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.error);
+        
+        localStorage.setItem('cr_token', data.token);
         loadDashboard();
       } catch (err) { alert(err.message); }
     }
 
     async function loadDashboard() {
       try {
-        const data = await api('/api/wallet', { auth: 'user' });
-        myWalletAddress = data.walletAddress;
-        document.getElementById('myWalletAddr').innerText = myWalletAddress;
+        const token = localStorage.getItem('cr_token');
+        const res = await fetch('/api/wallet', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.error);
+
+        window.myWalletAddress = data.walletAddress;
+        document.getElementById('myWalletAddr').innerText = data.walletAddress;
         show('dashView');
         
         let total = 0;
         let html = '';
+        
         for (const [coin, amount] of Object.entries(data.balances)) {
           const usd = amount * (prices[coin] || 0);
           total += usd;
@@ -215,81 +214,100 @@
         }
         document.getElementById('totalUsd').innerText = '$' + total.toFixed(2);
         document.getElementById('coinList').innerHTML = html;
-      } catch (err) { Tokens.clearUser(); show('loginView'); }
+      } catch (err) { 
+        localStorage.removeItem('cr_token'); 
+        show('loginView'); 
+      }
     }
 
     function copyAddr() {
-      navigator.clipboard.writeText(myWalletAddress);
-      alert('Address Copied: ' + myWalletAddress);
+      navigator.clipboard.writeText(window.myWalletAddress);
+      alert('Address Copied: ' + window.myWalletAddress);
     }
 
     async function openCoin(coin, amount) {
-      currentCoin = coin;
+      window.currentCoin = coin;
       document.getElementById('coinModal').classList.add('open');
       document.getElementById('mCoinName').innerText = coin;
       document.getElementById('mBalance').innerText = amount + ' ' + coin;
       document.getElementById('mUsd').innerText = '$' + (amount * (prices[coin] || 0)).toFixed(2);
-      document.getElementById('depositAddr').innerText = myWalletAddress;
+      document.getElementById('depositAddr').innerText = window.myWalletAddress;
       
-      showPanel(''); // Hide panels by default
+      showPanel(''); 
       
-      const data = await api('/api/wallet/history', { auth: 'user' });
-      const coinTxs = data.transactions.filter(t => t.coin === coin);
-      
-      let hHtml = '';
-      coinTxs.forEach(t => {
-        const color = t.type === 'in' ? '#00e5a0' : '#ff6b81';
-        const sign = t.type === 'in' ? '+' : '-';
-        hHtml += `<div class="tx-row">
-          <span style="color:#93a1b8; font-size:11px;">${t.note}</span> 
-          <span style="color:${color}; font-weight:bold;">${sign}${t.amount}</span>
-        </div>`;
-      });
-      if(!hHtml) hHtml = '<p style="color:#93a1b8;font-size:12px;">No history yet.</p>';
-      document.getElementById('mHistory').innerHTML = hHtml;
+      try {
+        const token = localStorage.getItem('cr_token');
+        const res = await fetch('/api/wallet/history', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        
+        const coinTxs = data.transactions.filter(t => t.coin === coin);
+        let hHtml = '';
+        coinTxs.forEach(t => {
+          const color = t.type === 'in' ? '#00e5a0' : '#ff6b81';
+          const sign = t.type === 'in' ? '+' : '-';
+          hHtml += `<div class="tx-row">
+            <span style="color:#93a1b8; font-size:11px;">${t.note}</span> 
+            <span style="color:${color}; font-weight:bold;">${sign}${t.amount}</span>
+          </div>`;
+        });
+        if(!hHtml) hHtml = '<p style="color:#93a1b8;font-size:12px;">No history yet.</p>';
+        document.getElementById('mHistory').innerHTML = hHtml;
+      } catch (err) {}
     }
 
     function closeModal() { document.getElementById('coinModal').classList.remove('open'); }
-
     function showPanel(panel) {
       ['deposit', 'send', 'withdraw'].forEach(p => document.getElementById('panel-' + p).classList.add('hidden'));
       if(panel) document.getElementById('panel-' + panel).classList.remove('hidden');
     }
 
     async function submitSend() {
-      const address = document.getElementById('sAddress').value;
-      const amount = document.getElementById('sAmount').value;
-      
-      if(!address || !amount) return alert('Please fill all fields');
-      
       try {
-        await api('/api/wallet/send', { 
-          method: 'POST', auth: 'user', body: { coin: currentCoin, amount: Number(amount), receiverAddress: address } 
+        const token = localStorage.getItem('cr_token');
+        const res = await fetch('/api/wallet/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({
+            coin: window.currentCoin,
+            amount: Number(document.getElementById('sAmount').value),
+            receiverAddress: document.getElementById('sAddress').value
+          })
         });
-        alert('Funds sent successfully!\nEmails have been sent to both parties.');
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.error);
+        
+        alert('Funds sent successfully!');
         closeModal();
-        loadDashboard(); // Refresh balances
+        loadDashboard();
       } catch (err) { alert(err.message); }
     }
 
     async function submitWithdraw() {
-      const address = document.getElementById('wAddress').value;
-      const amount = document.getElementById('wAmount').value;
-      
-      if(!address || !amount) return alert('Please fill all fields');
-      
       try {
-        await api('/api/wallet/withdraw', { 
-          method: 'POST', auth: 'user', body: { coin: currentCoin, amount: Number(amount), address } 
+        const token = localStorage.getItem('cr_token');
+        const res = await fetch('/api/wallet/withdraw', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({
+            coin: window.currentCoin,
+            amount: Number(document.getElementById('wAmount').value),
+            address: document.getElementById('wAddress').value
+          })
         });
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.error);
+        
         alert('Withdrawal request submitted! Waiting for Admin approval.');
         closeModal();
         loadDashboard();
       } catch (err) { alert(err.message); }
     }
 
-    function logout() { Tokens.clearUser(); show('loginView'); }
-    if (Tokens.getUser()) loadDashboard(); else show('loginView');
+    function logout() { localStorage.removeItem('cr_token'); show('loginView'); }
+    
+    if (localStorage.getItem('cr_token')) loadDashboard(); else show('loginView');
   </script>
 </body>
 </html>

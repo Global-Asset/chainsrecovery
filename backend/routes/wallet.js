@@ -1,68 +1,91 @@
 const express = require('express');
 const db = require('../db');
 const { requireUser } = require('../middleware/auth');
-const { sendTransactionEmail } = require('../utils');
 const router = express.Router();
 
-router.get('/', requireUser, (req, res) => {
-  const user = db.prepare('SELECT wallet_address FROM users WHERE id=?').get(req.user.uid);
-  const balances = db.prepare('SELECT coin, amount FROM balances WHERE user_id=?').all(req.user.uid);
-  const map = {};
-  balances.forEach(b => map[b.coin] = b.amount);
-  res.json({ ok: true, walletAddress: user.wallet_address, balances: map });
+// GET WALLET DASHBOARD
+router.get('/', requireUser, async (req, res) => {
+  try {
+    const userRes = await db.execute({ sql: 'SELECT wallet_address FROM users WHERE id=?', args: [req.user.uid] });
+    const balsRes = await db.execute({ sql: 'SELECT coin, amount FROM balances WHERE user_id=?', args: [req.user.uid] });
+
+    const balances = {};
+    balsRes.rows.forEach(b => balances[b.coin] = b.amount);
+
+    res.json({ ok: true, walletAddress: userRes.rows[0].wallet_address, balances });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load wallet' });
+  }
 });
 
-router.get('/history', requireUser, (req, res) => {
-  const txs = db.prepare('SELECT coin, type, amount, note, created_at FROM transactions WHERE user_id=? ORDER BY id DESC LIMIT 50').all(req.user.uid);
-  res.json({ ok: true, transactions: txs });
+// GET TRANSACTION HISTORY
+router.get('/history', requireUser, async (req, res) => {
+  try {
+    const txRes = await db.execute({
+      sql: 'SELECT * FROM transactions WHERE user_id=? ORDER BY id DESC',
+      args: [req.user.uid]
+    });
+    res.json({ ok: true, transactions: txRes.rows });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load history' });
+  }
 });
 
-router.post('/withdraw', requireUser, (req, res) => {
-  const { coin, amount, address } = req.body;
-  const bal = db.prepare('SELECT amount FROM balances WHERE user_id=? AND coin=?').get(req.user.uid, coin);
-  if (!bal || bal.amount < amount) return res.status(400).json({ error: 'Insufficient balance' });
-
-  db.prepare('UPDATE balances SET amount = amount - ? WHERE user_id=? AND coin=?').run(amount, req.user.uid, coin);
-  db.prepare('INSERT INTO withdrawals (user_id, coin, amount, address, created_at) VALUES (?,?,?,?,?)').run(req.user.uid, coin, amount, address, Date.now());
-  db.prepare('INSERT INTO transactions (user_id, coin, type, amount, note, created_at) VALUES (?,?,?,?,?,?)').run(req.user.uid, coin, 'out', amount, 'Withdrawal pending admin approval', Date.now());
-
-  res.json({ ok: true });
-});
-
-// NEW: Send to another user
+// INTERNAL SEND FUNDS
 router.post('/send', requireUser, async (req, res) => {
   const { coin, amount, receiverAddress } = req.body;
   const senderId = req.user.uid;
 
-  if (!coin || !amount || !receiverAddress) return res.status(400).json({ error: 'Missing fields' });
-  if (amount <= 0) return res.status(400).json({ error: 'Amount must be greater than 0' });
+  if (!amount || amount <= 0) return res.status(400).json({ error: 'Invalid amount' });
 
-  const sender = db.prepare('SELECT * FROM users WHERE id=?').get(senderId);
-  const receiver = db.prepare('SELECT * FROM users WHERE wallet_address=?').get(receiverAddress);
+  try {
+    const receiverRes = await db.execute({ sql: 'SELECT id FROM users WHERE wallet_address=?', args: [receiverAddress] });
+    if (receiverRes.rows.length === 0) return res.status(404).json({ error: 'Receiver wallet not found' });
+    const receiverId = receiverRes.rows[0].id;
 
-  if (!receiver) return res.status(404).json({ error: 'Receiver address not found on ChainRecover' });
-  if (sender.id === receiver.id) return res.status(400).json({ error: 'You cannot send to yourself' });
+    if (senderId === receiverId) return res.status(400).json({ error: 'Cannot send to yourself' });
 
-  const senderBal = db.prepare('SELECT amount FROM balances WHERE user_id=? AND coin=?').get(senderId, coin);
-  if (!senderBal || senderBal.amount < amount) return res.status(400).json({ error: 'Insufficient balance' });
+    const senderBalRes = await db.execute({ sql: 'SELECT amount FROM balances WHERE user_id=? AND coin=?', args: [senderId, coin] });
+    const senderBal = senderBalRes.rows.length > 0 ? senderBalRes.rows[0].amount : 0;
 
-  const now = Date.now();
+    if (senderBal < amount) return res.status(400).json({ error: 'Insufficient balance' });
 
-  db.transaction(() => {
-    db.prepare('UPDATE balances SET amount = amount - ? WHERE user_id=? AND coin=?').run(amount, senderId, coin);
-    db.prepare('INSERT INTO balances (user_id, coin, amount) VALUES (?, ?, ?) ON CONFLICT(user_id, coin) DO UPDATE SET amount = amount + ?').run(receiver.id, coin, amount, amount);
-    
-    // Sender History
-    db.prepare('INSERT INTO transactions (user_id, coin, type, amount, note, created_at) VALUES (?,?,?,?,?,?)').run(senderId, coin, 'out', amount, `Sent to ${receiver.name}`, now);
-    // Receiver History
-    db.prepare('INSERT INTO transactions (user_id, coin, type, amount, note, created_at) VALUES (?,?,?,?,?,?)').run(receiver.id, coin, 'in', amount, `Received from ${sender.name}`, now);
-  })();
+    await db.batch([
+      { sql: 'UPDATE balances SET amount = amount - ? WHERE user_id=? AND coin=?', args: [amount, senderId, coin] },
+      { sql: 'UPDATE balances SET amount = amount + ? WHERE user_id=? AND coin=?', args: [amount, receiverId, coin] },
+      { sql: `INSERT INTO transactions (user_id, coin, type, amount, note, created_at) VALUES (?,?,?,?,?,?)`, args: [senderId, coin, 'out', amount, `Sent to ${receiverAddress}`, Date.now()] },
+      { sql: `INSERT INTO transactions (user_id, coin, type, amount, note, created_at) VALUES (?,?,?,?,?,?)`, args: [receiverId, coin, 'in', amount, `Received from ${req.user.email}`, Date.now()] }
+    ]);
 
-  // Send emails
-  await sendTransactionEmail(sender.email, 'Sent', amount, coin, receiver.wallet_address);
-  await sendTransactionEmail(receiver.email, 'Received', amount, coin, sender.wallet_address);
+    res.json({ ok: true, message: 'Funds sent successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Send failed' });
+  }
+});
 
-  res.json({ ok: true, message: 'Transfer successful' });
+// REQUEST WITHDRAWAL
+router.post('/withdraw', requireUser, async (req, res) => {
+  const { coin, amount, address } = req.body;
+  const userId = req.user.uid;
+
+  if (!amount || amount <= 0) return res.status(400).json({ error: 'Invalid amount' });
+
+  try {
+    const balRes = await db.execute({ sql: 'SELECT amount FROM balances WHERE user_id=? AND coin=?', args: [userId, coin] });
+    const bal = balRes.rows.length > 0 ? balRes.rows[0].amount : 0;
+
+    if (bal < amount) return res.status(400).json({ error: 'Insufficient balance' });
+
+    await db.batch([
+      { sql: 'UPDATE balances SET amount = amount - ? WHERE user_id=? AND coin=?', args: [amount, userId, coin] },
+      { sql: 'INSERT INTO withdrawals (user_id, coin, amount, address, status, created_at) VALUES (?,?,?,?,?,?)', args: [userId, coin, amount, address, 'Pending', Date.now()] },
+      { sql: `INSERT INTO transactions (user_id, coin, type, amount, note, created_at) VALUES (?,?,?,?,?,?)`, args: [userId, coin, 'out', amount, `Withdrawal Requested (Pending)`, Date.now()] }
+    ]);
+
+    res.json({ ok: true, message: 'Withdrawal request submitted' });
+  } catch (err) {
+    res.status(500).json({ error: 'Withdrawal failed' });
+  }
 });
 
 module.exports = router;

@@ -1,31 +1,50 @@
 const jwt = require('jsonwebtoken');
-const SECRET = process.env.JWT_SECRET;
 
-const signToken = (payload, expiresIn = '7d') => jwt.sign(payload, SECRET, { expiresIn });
+// Make sure to add JWT_SECRET to your Render Environment Variables!
+// Example value: my_super_secret_jwt_key_123
+const SECRET = process.env.JWT_SECRET || 'fallback_secret_for_local_testing_only';
 
+// Generate a new token
+const signToken = (payload, expiresIn = '7d') => {
+  return jwt.sign(payload, SECRET, { expiresIn });
+};
+
+// Helper function to extract the token from the Authorization header
 function extract(req) {
   const h = req.headers.authorization || '';
-    return h.startsWith('Bearer ') ? h.slice(7) : null;
-    }
+  return h.startsWith('Bearer ') ? h.slice(7) : null;
+}
 
-    function requireUser(req, res, next) {
-      const token = extract(req);
-        if (!token) return res.status(401).json({ error: 'Missing token' });
-          try {
-              const d = jwt.verify(token, SECRET);
-                  if (d.role !== 'user') return res.status(403).json({ error: 'User token required' });
-                      req.user = d; next();
-                        } catch { return res.status(401).json({ error: 'Invalid token' }); }
-                        }
+// Middleware to protect normal user routes
+function requireUser(req, res, next) {
+  const token = extract(req);
+  if (!token) return res.status(401).json({ error: 'Missing token' });
 
-                        function requireAdmin(req, res, next) {
-                          const token = extract(req);
-                            if (!token) return res.status(401).json({ error: 'Missing token' });
-                              try {
-                                  const d = jwt.verify(token, SECRET);
-                                      if (d.role !== 'admin') return res.status(403).json({ error: 'Admin token required' });
-                                          req.admin = d; next();
-                                            } catch { return res.status(401).json({ error: 'Invalid token' }); }
-                                            }
+  try {
+    const d = jwt.verify(token, SECRET);
+    if (d.role !== 'user') return res.status(403).json({ error: 'User token required' });
+    
+    req.user = d; 
+    next();
+  } catch (err) { 
+    return res.status(401).json({ error: 'Invalid or expired token' }); 
+  }
+}
 
-                                            module.exports = { signToken, requireUser, requireAdmin };
+// Middleware to protect admin routes
+function requireAdmin(req, res, next) {
+  const token = extract(req);
+  if (!token) return res.status(401).json({ error: 'Missing token' });
+
+  try {
+    const d = jwt.verify(token, SECRET);
+    if (d.role !== 'admin') return res.status(403).json({ error: 'Admin token required' });
+    
+    req.admin = d; 
+    next();
+  } catch (err) { 
+    return res.status(401).json({ error: 'Invalid or expired token' }); 
+  }
+}
+
+module.exports = { signToken, requireUser, requireAdmin };
