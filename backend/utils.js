@@ -20,20 +20,20 @@ if (process.env.SMTP_HOST && process.env.SMTP_USER) {
 
                     async function sendOtpEmail(email, code, purpose) {
                       if (!transporter) {
-                          console.log(`\n📧 [DEV MODE] OTP for ${email} is: ${code}\n`);
-                              return;
-                                }
-                                  try {
-                                      await transporter.sendMail({
-                                            from: process.env.SMTP_FROM || process.env.SMTP_USER,
-                                                  to: email,
-                                                        subject: 'ChainRecover Code',
-                                                              text: `Your code is: ${code}`
-                                                                  });
-                                                                    } catch (err) {
-                                                                        console.log(`\n📧 [FALLBACK] OTP for ${email} is: ${code}\n`);
-                                                                          }
-                                                                          }
+                        if (process.env.NODE_ENV === 'production') {
+                          throw new Error('Email delivery is not configured');
+                        }
+                        console.log(`\n📧 [DEV MODE] OTP for ${email} is: ${code}\n`);
+                        return false;
+                      }
+                      await transporter.sendMail({
+                        from: process.env.SMTP_FROM || process.env.SMTP_USER,
+                        to: email,
+                        subject: 'ChainRecover Code',
+                        text: `Your ${purpose} code is: ${code}`
+                      });
+                      return true;
+                    }
 async function sendTransactionEmail(email, type, amount, coin, otherParty) {
     if (!transporter) {
         console.log(`\n📧 [DEV MODE EMAIL]`);

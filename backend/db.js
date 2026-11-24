@@ -1,9 +1,23 @@
 const Database = require('better-sqlite3');
+const fs = require('fs');
 const path = require('path');
 
-const db = new Database(path.join(__dirname, 'data', 'chainrecover.db'));
+const dbPath = process.env.CHAINRECOVER_DB_PATH || path.join(__dirname, 'data', 'chainrecover.db');
+fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+const db = new Database(dbPath);
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
+db.exec(`
+  CREATE TABLE IF NOT EXISTS wallet_challenges (
+    nonce TEXT PRIMARY KEY,
+    email TEXT NOT NULL,
+    wallet_address TEXT NOT NULL,
+    message TEXT NOT NULL,
+    expires_at INTEGER NOT NULL,
+    used INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL
+  );
+`);
 
 db.exec(`
 CREATE TABLE IF NOT EXISTS users (
@@ -49,4 +63,6 @@ db.exec(`
                   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
                   );
                   `);
+db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_wallet_address
+                  ON users(wallet_address COLLATE NOCASE)`);
                                         module.exports = db;

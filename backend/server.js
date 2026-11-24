@@ -14,6 +14,7 @@ app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json({ limit: '2mb' }));
 
 // Serve the frontend files (HTML, CSS, JS)
+app.get('/wallet.html', (req, res) => res.redirect(302, '/client-portal.html'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors({ origin: true, credentials: true }));
 
@@ -27,6 +28,7 @@ const limiter = rateLimit({
       message: { error: 'Too many case inquiries. Please try again later.' }
     });
     app.use('/api/auth/login', limiter);
+    app.use('/api/auth/wallet-challenge', limiter);
     app.use('/api/admin/login', limiter);
 
     app.use('/api/auth', require('./routes/auth'));

@@ -5,11 +5,11 @@ const { sendTransactionEmail } = require('../utils');
 const router = express.Router();
 
 router.get('/', requireUser, (req, res) => {
-  const user = db.prepare('SELECT wallet_address FROM users WHERE id=?').get(req.user.uid);
+          const user = db.prepare('SELECT email, wallet_address FROM users WHERE id=?').get(req.user.uid);
     const balances = db.prepare('SELECT coin, amount FROM balances WHERE user_id=?').all(req.user.uid);
       const map = {};
         balances.forEach(b => map[b.coin] = b.amount);
-          res.json({ ok: true, walletAddress: user.wallet_address, balances: map });
+          res.json({ ok: true, email: user.email, walletAddress: user.wallet_address, balances: map });
           });
 
           router.get('/history', requireUser, (req, res) => {

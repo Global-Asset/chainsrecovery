@@ -13,58 +13,54 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#05070e;--card:rgba(14,22,36,.58);--border:rgba(177,199,226,.14);
-  --text:#e9eefb;--muted:#93a1b8;--acc:#00e5a0;--acc2:#3b82f6;--acc3:#8b5cf6;--gold:#ffc857;
+  --bg:#f4f8f8;--card:#fff;--border:#dce7e7;
+  --text:#20323d;--muted:#60717b;--acc:#167d68;--acc2:#397e98;--acc3:#6577a5;--gold:#98702a;
 }
 html{scroll-behavior:smooth;scroll-padding-top:88px}
-body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;background:radial-gradient(ellipse at 12% 9%,rgba(0,229,160,.09),transparent 34%),radial-gradient(ellipse at 88% 22%,rgba(59,130,246,.11),transparent 38%),var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;top:0 !important;}
-body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(circle at 50% 45%,rgba(5,7,14,.04),rgba(5,7,14,.56) 80%);}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;background:radial-gradient(ellipse at 12% 9%,rgba(22,125,104,.07),transparent 34%),radial-gradient(ellipse at 88% 22%,rgba(57,126,152,.07),transparent 38%),var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;top:0 !important;}
 img,svg{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}
 button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 input,select,textarea{font:inherit;color:inherit;outline:none;}
-::selection{background:rgba(0,229,160,.28);color:#fff}
+::selection{background:rgba(22,125,104,.2);color:var(--text)}
 :focus-visible{outline:2px solid var(--acc);outline-offset:3px}
 .wrap{width:100%;max-width:1180px;margin:0 auto;padding:0 22px}
 
 /* BACKGROUND CANVAS */
-#particleCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; opacity: 0.4; }
-
 /* NAV */
 header{position:fixed;top:0;left:0;right:0;z-index:100;transition:.35s ease;border-bottom:1px solid transparent;}
-header.scrolled{background:rgba(5,7,14,.74);backdrop-filter:blur(22px);border-bottom:1px solid var(--border);box-shadow:0 12px 36px rgba(0,0,0,.2)}
+header.scrolled{background:rgba(255,255,255,.92);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);box-shadow:0 8px 26px rgba(32,50,61,.07)}
 .nav{position:relative;display:flex;align-items:center;justify-content:space-between;height:76px;gap:14px}
 .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.05rem}
-.logo .mark{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(135deg,var(--acc),var(--acc2));box-shadow:0 6px 22px rgba(0,229,160,.35)}
-.logo .mark svg{width:20px;height:20px;stroke:#04120c;stroke-width:2.4;fill:none}
+.logo .mark{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:var(--acc);box-shadow:0 5px 14px rgba(22,125,104,.18)}
+.logo .mark svg{width:20px;height:20px;stroke:#fff;stroke-width:2.4;fill:none}
 .logo small{display:block;font-size:.6rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
 .nav-links{display:flex;align-items:center;gap:2px}
 .nav-links a{padding:9px 12px;border-radius:10px;font-size:.87rem;font-weight:500;color:var(--muted);transition:.2s}
-.nav-links a:hover{color:var(--text);background:rgba(255,255,255,.06)}
+.nav-links a:hover{color:var(--acc);background:#edf5f2}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:13px 24px;border-radius:12px;font-weight:700;font-size:.92rem;transition:.25s;border:1px solid transparent}
-.btn-primary{background:linear-gradient(135deg,#62f3c7,var(--acc),#00b8d4);color:#03130d;box-shadow:0 10px 30px -8px rgba(0,229,160,.45)}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 38px -8px rgba(0,229,160,.65)}
-.btn-ghost{background:rgba(255,255,255,.05);border-color:var(--border);color:var(--text)}
-.btn-ghost:hover{background:rgba(255,255,255,.1);transform:translateY(-2px)}
+.btn-primary{background:var(--acc);color:#fff;box-shadow:0 8px 20px -8px rgba(22,125,104,.4)}
+.btn-primary:hover{transform:translateY(-2px);background:#126b59;box-shadow:0 12px 26px -8px rgba(22,125,104,.45)}
+.btn-ghost{background:#fff;border-color:var(--border);color:var(--text)}
+.btn-ghost:hover{background:#f0f6f4;border-color:#bdd7cf;transform:translateY(-2px)}
 .nav-cta{display:flex;align-items:center;gap:10px}
-.menu-toggle{display:none;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid var(--border);border-radius:11px;background:rgba(255,255,255,.05);font-size:1.2rem}
+.menu-toggle{display:none;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid var(--border);border-radius:11px;background:#fff;font-size:1.2rem}
 
 /* TRANSLATE */
-.lang-pill{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:11px;background:rgba(255,255,255,.05);border:1px solid var(--border)}
+.lang-pill{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:11px;background:#fff;border:1px solid var(--border)}
 .goog-te-gadget{font-family:inherit!important;font-size:0!important;color:transparent!important}
 .goog-te-gadget .goog-te-combo{background:transparent;color:var(--text);border:none;font-size:.8rem;font-weight:600;width:90px;cursor:pointer}
-.goog-te-gadget .goog-te-combo option{background:#0a0f1c;color:#fff}
+.goog-te-gadget .goog-te-combo option{background:#fff;color:var(--text)}
 .goog-logo-link,.goog-te-gadget span,iframe.goog-te-banner-frame{display:none!important}
 
 /* HERO */
 .hero{padding:150px 0 90px}
 .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:60px;align-items:center}
-.badge{display:inline-flex;align-items:center;gap:9px;padding:7px 15px;border-radius:999px;background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.28);font-size:.78rem;font-weight:600;color:#8df3d4;backdrop-filter:blur(10px)}
-.badge .pulse{width:8px;height:8px;border-radius:50%;background:var(--acc);animation:pulse 2s infinite}
-@keyframes pulse{70%{box-shadow:0 0 0 9px rgba(0,229,160,0)}100%{box-shadow:0 0 0 0 rgba(0,229,160,0)}}
+.badge{display:inline-flex;align-items:center;gap:9px;padding:7px 15px;border-radius:999px;background:#edf6f2;border:1px solid #d5e8e0;font-size:.78rem;font-weight:650;color:#176b59}
+.badge .pulse{width:8px;height:8px;border-radius:50%;background:var(--acc)}
 @keyframes progress-glow{from{opacity:.72}to{opacity:1}}
 h1{font-size:clamp(2.4rem,5vw,4rem);line-height:1.08;letter-spacing:-2px;font-weight:800;margin:22px 0 20px}
-.grad{background:linear-gradient(100deg,var(--acc),#37d6ff,var(--acc3));-webkit-background-clip:text;background-clip:text;color:transparent}
+.grad{color:var(--acc)}
 .hero p.lead{font-size:1.1rem;color:var(--muted);margin-bottom:32px;max-width:540px}
 .hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:34px}
 .trust{display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:.82rem;color:var(--muted)}
@@ -77,79 +73,79 @@ section{padding:96px 0;position:relative;}
 h2{font-size:clamp(1.85rem,3.6vw,2.7rem);line-height:1.15;letter-spacing:-1.4px;font-weight:800;margin-bottom:16px}
 .head p{color:var(--muted);font-size:1rem}
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:30px 26px;transition:transform .3s ease,border-color .3s ease,background .3s ease,box-shadow .3s ease;backdrop-filter:blur(16px);box-shadow:0 18px 50px rgba(0,0,0,.12)}
-.card:hover{transform:translateY(-5px);border-color:rgba(0,229,160,.36);background:rgba(17,35,46,.7);box-shadow:0 24px 54px -24px rgba(0,229,160,.32);}
-.icon{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;margin-bottom:20px;background:rgba(0,229,160,.15);color:var(--acc);font-size:1.5rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:30px 26px;transition:transform .3s ease,border-color .3s ease,background .3s ease,box-shadow .3s ease;box-shadow:0 12px 34px rgba(32,50,61,.06)}
+.card:hover{transform:translateY(-4px);border-color:#b8d8ce;background:#fff;box-shadow:0 18px 38px rgba(32,50,61,.1)}
+.icon{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;margin-bottom:20px;background:#edf6f2;color:var(--acc);font-size:1.5rem}
 .card h3{font-size:1.1rem;font-weight:700;margin-bottom:10px}
 .card p{font-size:.9rem;color:var(--muted)}
 
 /* PROOF GALLERY */
 .proof-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
-.proof{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;backdrop-filter:blur(16px);transition:transform .3s ease,border-color .3s ease,box-shadow .3s ease}
-.proof:hover{transform:translateY(-5px);border-color:rgba(0,229,160,.32);box-shadow:0 20px 48px rgba(0,0,0,.24)}
-.shot-body{padding:16px;background:rgba(3,6,13,.6);min-height:160px;display:flex;flex-direction:column;gap:8px;justify-content:center;font-family:monospace;font-size:.75rem}
-.mono-row{display:flex;justify-content:space-between;color:#8ea0b8}
-.mono-row .pos{color:var(--acc)}.mono-row .neg{color:#ff7a90}
+.proof{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:transform .3s ease,border-color .3s ease,box-shadow .3s ease}
+.proof:hover{transform:translateY(-4px);border-color:#b8d8ce;box-shadow:0 16px 36px rgba(32,50,61,.1)}
+.shot-body{padding:16px;background:#f2f7f7;min-height:160px;display:flex;flex-direction:column;gap:8px;justify-content:center;font-family:monospace;font-size:.75rem}
+.mono-row{display:flex;justify-content:space-between;color:#5e707b}
+.mono-row .pos{color:var(--acc)}.mono-row .neg{color:#b64050}
 .proof-body{padding:20px}
-.tag{display:inline-block;margin-top:10px;font-size:.68rem;font-weight:800;padding:4px 10px;border-radius:99px;background:rgba(0,229,160,.14);color:#8df3d4;border:1px solid rgba(0,229,160,.3)}
+.tag{display:inline-block;margin-top:10px;font-size:.68rem;font-weight:800;padding:4px 10px;border-radius:99px;background:#edf6f2;color:#176b59;border:1px solid #d5e8e0}
 
 /* TESTIMONIALS */
 .t-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
-.t-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:26px;backdrop-filter:blur(16px);transition:transform .3s ease,border-color .3s ease}
-.t-card:hover{transform:translateY(-4px);border-color:rgba(0,229,160,.3)}
+.t-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:26px;transition:transform .3s ease,border-color .3s ease,box-shadow .3s ease}
+.t-card:hover{transform:translateY(-4px);border-color:#b8d8ce;box-shadow:0 12px 30px rgba(32,50,61,.08)}
 .t-top{display:flex;align-items:center;gap:13px;margin-bottom:14px}
 .avatar{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.1);}
 .stars{color:var(--gold);font-size:1rem;margin-bottom:10px}
-.t-card p{font-size:.88rem;color:#c3cee0;margin-bottom:15px}
+.t-card p{font-size:.88rem;color:var(--muted);margin-bottom:15px}
 .recovered{font-size:.75rem;font-weight:800;color:var(--acc)}
 
 /* WHITEPAPER */
-.wp-inner{background:linear-gradient(165deg,rgba(10,17,32,0.8),rgba(7,11,21,0.8));border:1px solid var(--border);border-radius:24px;padding:46px;display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center;backdrop-filter:blur(10px);}
-.wp-badge{display:inline-block;padding:6px 14px;border-radius:99px;background:rgba(139,92,246,.16);border:1px solid rgba(139,92,246,.45);font-size:.72rem;font-weight:800;color:#c4b5fd;margin-bottom:18px}
-.wp-chapters{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:18px;padding:24px;list-style:none}
-.wp-chapters li{padding:8px 0;border-bottom:1px dashed rgba(255,255,255,.07);font-size:.85rem;color:#cfd9e8}
+.wp-inner{background:linear-gradient(145deg,#fff,#f0f7f5);border:1px solid var(--border);border-radius:24px;padding:46px;display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center;box-shadow:0 14px 36px rgba(32,50,61,.06)}
+.wp-badge{display:inline-block;padding:6px 14px;border-radius:99px;background:#f0f2f8;border:1px solid #dfe3ef;font-size:.72rem;font-weight:800;color:#53658f;margin-bottom:18px}
+.wp-chapters{background:#fff;border:1px solid var(--border);border-radius:18px;padding:24px;list-style:none}
+.wp-chapters li{padding:8px 0;border-bottom:1px dashed var(--border);font-size:.85rem;color:#40535f}
 .wp-chapters li:last-child{border:none}
 
 /* CONTACT */
 .contact-wrap{display:grid;grid-template-columns:.85fr 1.15fr;gap:50px;align-items:start}
-.form{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:32px;backdrop-filter:blur(10px);}
+.form{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:32px;box-shadow:0 14px 36px rgba(32,50,61,.06)}
 .f-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .field{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
 .field.full{grid-column:1/-1}
-.field label{font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase}
-.field input,.field select,.field textarea{width:100%;padding:13px 15px;border-radius:11px;background:rgba(0,0,0,.35);border:1px solid var(--border);color:var(--text);font-size:.92rem}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(0,229,160,.1)}
+.field label{font-size:.75rem;font-weight:700;color:#526671;text-transform:uppercase}
+.field input,.field select,.field textarea{width:100%;padding:13px 15px;border-radius:11px;background:#fff;border:1px solid var(--border);color:var(--text);font-size:.92rem}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(22,125,104,.1)}
 .form .btn{width:100%}
 .form .btn:disabled{cursor:wait;opacity:.7;transform:none}
 .form-status{min-height:1.5em;margin-top:12px;color:var(--muted);font-size:.88rem}
-.form-status.error{color:#ff9aaa}
+.form-status.error{color:#b42335}
 .form-status.success{color:var(--acc)}
 
 /* FOOTER */
-footer{border-top:1px solid var(--border);padding:56px 0 30px;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);}
+footer{border-top:1px solid var(--border);padding:56px 0 30px;background:#edf3f3}
 .f-grid2{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:36px;margin-bottom:40px}
-.f-col h6{font-size:.76rem;letter-spacing:1.6px;text-transform:uppercase;color:#fff;margin-bottom:16px}
+.f-col h6{font-size:.76rem;letter-spacing:1.6px;text-transform:uppercase;color:var(--text);margin-bottom:16px}
 .f-col a{display:block;font-size:.88rem;color:var(--muted);padding:5px 0}
 .f-col a:hover{color:var(--acc)}
-.f-bottom{border-top:1px solid var(--border);padding-top:24px;display:flex;justify-content:space-between;font-size:.8rem;color:#6b7b93}
+.f-bottom{border-top:1px solid var(--border);padding-top:24px;display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted)}
 
 /* MODAL (WHITEPAPER) */
-.modal{position:fixed;inset:0;z-index:200;display:none;padding:24px;background:rgba(2,4,10,.85);backdrop-filter:blur(8px);overflow-y:auto}
+.modal{position:fixed;inset:0;z-index:200;display:none;padding:24px;background:rgba(24,43,52,.35);backdrop-filter:blur(5px);overflow-y:auto}
 .modal.open{display:flex;align-items:flex-start;justify-content:center}
-.modal-box{width:100%;max-width:800px;background:#0b1322;border:1px solid rgba(0,229,160,.28);border-radius:22px;margin:auto;}
-.modal-head{display:flex;justify-content:space-between;padding:22px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#0b1322;z-index:2;}
-.modal-body{padding:30px;color:#b9c6d8;font-size:.95rem;line-height:1.7;}
-.modal-body h4{color:#fff;margin:24px 0 10px;font-size:1.1rem;}
+.modal-box{width:100%;max-width:800px;background:#fff;border:1px solid var(--border);border-radius:22px;margin:auto;box-shadow:0 24px 70px rgba(32,50,61,.2)}
+.modal-head{display:flex;justify-content:space-between;padding:22px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;z-index:2;}
+.modal-body{padding:30px;color:#4e626e;font-size:.95rem;line-height:1.7;}
+.modal-body h4{color:var(--text);margin:24px 0 10px;font-size:1.1rem;}
 .modal-body p{margin-bottom:12px;}
 
 /* TOAST */
-.toast{position:fixed;bottom:28px;right:28px;z-index:999;display:flex;gap:12px;background:#0d1626;border:1px solid rgba(0,229,160,.45);border-radius:14px;padding:16px 20px;transform:translateY(140%);opacity:0;transition:.4s}
+.toast{position:fixed;bottom:28px;right:28px;z-index:999;display:flex;gap:12px;background:#fff;border:1px solid #c8dfd7;border-radius:14px;padding:16px 20px;box-shadow:0 12px 32px rgba(32,50,61,.15);transform:translateY(140%);opacity:0;transition:.4s}
 .toast.show{transform:translateY(0);opacity:1}
 
 @media(max-width:980px){
   .hero-grid,.cards,.proof-grid,.t-grid,.wp-inner,.contact-wrap,.f-grid2{grid-template-columns:1fr}
   .menu-toggle{display:inline-flex}
-  .nav-links{display:none;position:absolute;top:calc(100% - 1px);left:0;right:0;z-index:2;align-items:stretch;flex-direction:column;padding:10px;border:1px solid var(--border);border-radius:0 0 14px 14px;background:rgba(5,7,14,.97);backdrop-filter:blur(18px)}
+  .nav-links{display:none;position:absolute;top:calc(100% - 1px);left:0;right:0;z-index:2;align-items:stretch;flex-direction:column;padding:10px;border:1px solid var(--border);border-radius:0 0 14px 14px;background:rgba(255,255,255,.98);box-shadow:0 12px 24px rgba(32,50,61,.08)}
   .nav-links.is-open{display:flex}
   .nav-links a{padding:12px}
   .lang-pill{display:none}
@@ -162,24 +158,24 @@ footer{border-top:1px solid var(--border);padding:56px 0 30px;background:rgba(0,
 .explorer-heading .head{margin:0;text-align:left}
 .coin-stage{display:grid;justify-items:center;gap:8px;min-width:145px;color:var(--muted);font-size:.72rem;text-align:center}
 .coin-spin{position:relative;width:94px;height:94px;transform-style:preserve-3d;animation:coin-spin 7s linear infinite}
-.coin-face{position:absolute;inset:0;display:grid;place-items:center;border:4px double rgba(0,229,160,.8);border-radius:50%;background:radial-gradient(circle at 35% 30%,#174b48,#071b22 72%);box-shadow:inset 0 0 18px rgba(0,229,160,.24),0 0 35px rgba(0,229,160,.18);backface-visibility:hidden}
-.coin-face.back{transform:rotateY(180deg);background:radial-gradient(circle at 35% 30%,#283768,#10152b 72%);border-color:rgba(102,157,255,.8)}
-.coin-face svg{width:45px;height:45px;fill:none;stroke:#9bffe1;stroke-width:1.8}
-.coin-face.back svg{stroke:#b8caff}
+.coin-face{position:absolute;inset:0;display:grid;place-items:center;border:3px solid #bddbd1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#eaf5f1 72%);box-shadow:0 10px 24px rgba(32,50,61,.1);backface-visibility:hidden}
+.coin-face.back{transform:rotateY(180deg);background:radial-gradient(circle at 35% 30%,#fff,#edf1f8 72%);border-color:#d6dced}
+.coin-face svg{width:45px;height:45px;fill:none;stroke:#367f6b;stroke-width:1.8}
+.coin-face.back svg{stroke:#6478a7}
 @keyframes coin-spin{to{transform:rotateY(360deg) rotateX(12deg)}}
-.sample-notice{margin-bottom:20px;padding:12px 16px;border:1px solid rgba(255,200,87,.3);border-radius:12px;background:rgba(255,200,87,.06);color:#f7d995;font-size:.82rem}
-.dashboard{overflow:hidden;border:1px solid var(--border);border-radius:20px;background:rgba(8,13,24,.82);backdrop-filter:blur(12px)}
+.sample-notice{margin-bottom:20px;padding:12px 16px;border:1px solid #eadbb8;border-radius:12px;background:#fbf7ed;color:#705b2b;font-size:.82rem}
+.dashboard{overflow:hidden;border:1px solid var(--border);border-radius:20px;background:#fff}
 .dashboard-toolbar{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 24px;border-bottom:1px solid var(--border)}
 .dashboard-toolbar h3{font-size:1.05rem}
 .dashboard-toolbar p,.chart-footnote{font-size:.78rem;color:var(--muted)}
 .dashboard-controls{display:flex;gap:10px}
 .dashboard-controls label{display:grid;gap:5px;color:var(--muted);font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.7px}
-.dashboard-controls select{min-width:130px;padding:9px 30px 9px 12px;border:1px solid var(--border);border-radius:9px;background:#0b1322;color:var(--text);font-size:.82rem}
+.dashboard-controls select{min-width:130px;padding:9px 30px 9px 12px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--text);font-size:.82rem}
 .chart-panel{padding:22px 24px 18px;border-bottom:1px solid var(--border)}
-.chart-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#cbd5e1;font-size:.82rem}
+.chart-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#40535f;font-size:.82rem}
 .chart-legend{display:inline-flex;align-items:center;gap:7px;color:var(--muted);font-size:.72rem}
 .chart-legend::before{content:"";width:9px;height:9px;border-radius:3px;background:var(--acc)}
-.activity-chart{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));align-items:end;gap:12px;height:190px;margin:18px 0 12px;padding:12px 8px 0;border-bottom:1px solid var(--border);background:repeating-linear-gradient(to bottom,transparent 0,transparent 46px,rgba(255,255,255,.055) 47px,transparent 48px)}
+.activity-chart{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));align-items:end;gap:12px;height:190px;margin:18px 0 12px;padding:12px 8px 0;border-bottom:1px solid var(--border);background:repeating-linear-gradient(to bottom,transparent 0,transparent 46px,#edf2f2 47px,transparent 48px)}
 .chart-column{display:flex;height:100%;min-width:0;flex-direction:column;align-items:center;justify-content:flex-end;gap:7px}
 .chart-bar{width:min(100%,38px);min-height:4px;border-radius:7px 7px 2px 2px;background:linear-gradient(180deg,#38f5bd,rgba(0,184,212,.52));box-shadow:0 0 16px rgba(0,229,160,.16);transition:height .35s ease}
 .chart-label{padding-bottom:7px;color:var(--muted);font-size:.68rem;white-space:nowrap}
@@ -190,15 +186,15 @@ footer{border-top:1px solid var(--border);padding:56px 0 30px;background:rgba(0,
 .table-scroll{overflow-x:auto;padding:0 24px 22px}
 .chain-table{width:100%;min-width:600px;border-collapse:collapse;text-align:left;font-size:.82rem}
 .chain-table th{padding:11px 12px;color:var(--muted);font-size:.68rem;letter-spacing:.8px;text-transform:uppercase}
-.chain-table td{padding:13px 12px;border-top:1px solid rgba(255,255,255,.07)}
-.chain-table tbody tr:hover{background:rgba(255,255,255,.025)}
+.chain-table td{padding:13px 12px;border-top:1px solid var(--border)}
+.chain-table tbody tr:hover{background:#f5f8f8}
 .chain-name{font-weight:700}
-.sample-tag{display:inline-block;padding:3px 8px;border:1px solid rgba(255,200,87,.25);border-radius:99px;color:#f7d995;font-size:.67rem}
+.sample-tag{display:inline-block;padding:3px 8px;border:1px solid #eadbb8;border-radius:99px;color:#705b2b;font-size:.67rem}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;padding:36px 22px;text-align:center}
 .stats-grid>div{padding:10px 14px;border-right:1px solid var(--border)}
 .stats-grid>div:last-child{border-right:0}
-.stats-grid strong{display:block;margin-bottom:4px;color:#fff;font-size:1rem}
+.stats-grid strong{display:block;margin-bottom:4px;color:var(--text);font-size:1rem}
 .stats-grid span{color:var(--muted);font-size:.8rem}
 .sample-notice a{text-decoration:underline;text-underline-offset:3px}
 .reveal-on-scroll{opacity:0;transform:translateY(18px);transition:opacity .65s ease,transform .65s cubic-bezier(.2,.7,.2,1)}
@@ -232,8 +228,6 @@ footer{border-top:1px solid var(--border);padding:56px 0 30px;background:rgba(0,
 </head>
 <body>
 
-<canvas id="particleCanvas"></canvas>
-
 <header id="header">
   <div class="wrap nav">
     <a href="#" class="logo">
@@ -242,14 +236,15 @@ footer{border-top:1px solid var(--border);padding:56px 0 30px;background:rgba(0,
     </a>
     <nav class="nav-links" id="primaryNav" aria-label="Primary navigation">
       <a href="#services">Services</a>
-      <a href="#results">Examples</a>
-      <a href="#explorer">Data Lab</a>
+      <a href="#results">Investigation</a>
+      <a href="#explorer">Our Approach</a>
       <a href="#trust">Safety</a>
       <a href="#whitepaper">Whitepaper</a>
       <a href="#faq">FAQ</a>
     </nav>
     <div class="nav-cta">
       <div class="lang-pill"><div id="google_translate_element"></div></div>
+      <a href="/client-portal.html" class="btn btn-ghost" style="padding:10px 18px;font-size:.9rem;">Client Portal</a>
       <a href="#contact" id="contactLink" class="btn btn-primary" style="padding:10px 20px;font-size:.9rem;">Contact</a>
       <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation menu" aria-controls="primaryNav" aria-expanded="false">☰</button>
     </div>
@@ -265,6 +260,7 @@ footer{border-top:1px solid var(--border);padding:56px 0 30px;background:rgba(0,
       <p class="lead">Explore on-chain investigation and asset-tracing methods across wallets, bridges, and exchanges. Every case is different, and recovery is never guaranteed.</p>
       <div class="hero-actions">
         <a href="#contact" class="btn btn-primary">Start an Inquiry</a>
+        <a href="/client-portal.html" class="btn btn-ghost">Create Client Account</a>
         <button class="btn btn-ghost" onclick="openModal()">📜 Read Whitepaper</button>
       </div>
       <div class="trust">
@@ -274,21 +270,19 @@ footer{border-top:1px solid var(--border);padding:56px 0 30px;background:rgba(0,
       </div>
     </div>
     <div class="card">
-      <div style="display:flex;justify-content:space-between;color:var(--muted);font-size:.8rem;margin-bottom:15px;"><span>EXAMPLE INVESTIGATION FLOW</span><span style="color:var(--gold)">DEMO</span></div>
-      <div style="font-size:.8rem;color:var(--muted)">Illustrative progress indicator</div>
-      <div style="font-size:1.8rem;font-weight:800;color:var(--acc);margin-bottom:15px;">Evidence-led review</div>
-      <div style="height:8px;background:rgba(255,255,255,.1);border-radius:10px;overflow:hidden;margin-bottom:10px;"><div style="width:78%;height:100%;background:linear-gradient(90deg,var(--acc),#00b8d4);animation:progress-glow 3s ease-in-out infinite alternate;"></div></div>
-      <div style="font-size:.8rem;color:var(--muted);margin-bottom:20px;">A visual example only — not a live case or a recovery estimate.</div>
+      <div style="display:flex;justify-content:space-between;color:var(--muted);font-size:.8rem;margin-bottom:15px;"><span>OUR INVESTIGATION APPROACH</span><span style="color:var(--acc)">CLEAR STEPS</span></div>
+      <div style="font-size:.8rem;color:var(--muted)">A careful review, built around the available evidence</div>
+      <div style="font-size:1.8rem;font-weight:800;color:var(--acc);margin:8px 0 20px;">Understand the transaction</div>
       <div style="display:flex;flex-direction:column;gap:8px;font-size:.85rem;">
-        <div>01 &nbsp; Gather transaction details</div>
-        <div>02 &nbsp; Review public on-chain activity</div>
-        <div style="color:var(--acc);">03 &nbsp; Discuss realistic next steps</div>
+        <div>01 &nbsp; Share the public transaction details</div>
+        <div>02 &nbsp; Review relevant on-chain activity</div>
+        <div style="color:var(--acc);">03 &nbsp; Discuss findings and next steps</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- STATS -->q
+<!-- STATS -->
 <div style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:rgba(255,255,255,.025);backdrop-filter:blur(16px);">
   <div class="wrap stats-grid">
     <div><strong>Recovery is not guaranteed</strong><span>Outcomes depend on the facts of each case.</span></div>
@@ -298,14 +292,14 @@ footer{border-top:1px solid var(--border);padding:56px 0 30px;background:rgba(0,
   </div>
 </div>
 
-<!-- BLOCKCHAIN DATA LAB -->
+<!-- INVESTIGATION APPROACH -->
 <section id="explorer">
   <div class="wrap">
     <div class="explorer-heading">
       <div class="head">
-        <span class="eyebrow">Blockchain Data Lab</span>
-        <h2>Explore the movement of on-chain activity.</h2>
-        <p>Use this interactive sample dashboard to see how chain activity can be presented during an investigation.</p>
+        <span class="eyebrow">Our Approach</span>
+        <h2>Make complex activity easier to understand.</h2>
+        <p>Every review starts with the information you provide. We organize the relevant public transaction data and explain what it can—and cannot—show.</p>
       </div>
       <div class="coin-stage" aria-hidden="true">
         <div class="coin-spin">
@@ -316,55 +310,13 @@ footer{border-top:1px solid var(--border);padding:56px 0 30px;background:rgba(0,
             <svg viewBox="0 0 48 48"><path d="M24 5 40 14v20l-16 9L8 34V14L24 5Z"/><path d="M16 19h16M16 29h16M24 13v22"/></svg>
           </div>
         </div>
-        <span>Blockchain, connected</span>
+        <span>Evidence-led review</span>
       </div>
     </div>
-    <p class="sample-notice"><strong>Sample dashboard:</strong> all values and references below are illustrative examples, not live blockchain data or real case records.</p>
-    <div class="dashboard">
-      <div class="dashboard-toolbar">
-        <div>
-          <h3>Network activity</h3>
-          <p>Illustrative relative activity index</p>
-        </div>
-        <div class="dashboard-controls">
-          <label for="networkFilter">Network
-            <select id="networkFilter">
-              <option value="all">All networks</option>
-              <option value="Bitcoin">Bitcoin</option>
-              <option value="Ethereum">Ethereum</option>
-              <option value="Solana">Solana</option>
-            </select>
-          </label>
-          <label for="periodFilter">Time range
-            <select id="periodFilter">
-              <option value="24h">24 hours</option>
-              <option value="7d" selected>7 days</option>
-              <option value="30d">30 days</option>
-            </select>
-          </label>
-        </div>
-      </div>
-      <div class="chart-panel">
-        <div class="chart-meta">
-          <span id="activityChartTitle" aria-live="polite">Relative activity · All networks · 7 days</span>
-          <span class="chart-legend">Activity index</span>
-        </div>
-        <div class="activity-chart" id="activityChart" role="img" aria-label="Illustrative relative network activity chart"></div>
-        <p class="chart-footnote">The index is for demonstration only; it does not represent transaction counts, prices, or network health.</p>
-      </div>
-      <div class="table-heading">
-        <h3>Example network records</h3>
-        <p>References and index values are fictional placeholders.</p>
-      </div>
-      <div class="table-scroll">
-        <table class="chain-table">
-          <caption class="sr-only">Illustrative blockchain network sample records</caption>
-          <thead>
-            <tr><th scope="col">Network</th><th scope="col">Sample reference</th><th scope="col">Activity index</th><th scope="col">Record type</th></tr>
-          </thead>
-          <tbody id="networkTableBody"></tbody>
-        </table>
-      </div>
+    <div class="cards">
+      <div class="card"><div class="icon">01</div><h3>Share the details</h3><p>Provide transaction hashes, wallet addresses, dates, and a concise description of what happened.</p></div>
+      <div class="card"><div class="icon">02</div><h3>Review the public record</h3><p>Follow relevant transfers and contract interactions across the networks involved in your inquiry.</p></div>
+      <div class="card"><div class="icon">03</div><h3>Understand your options</h3><p>Receive a clear explanation of the observations, limitations, and potential next steps.</p></div>
     </div>
   </div>
 </section>
@@ -392,42 +344,29 @@ footer{border-top:1px solid var(--border);padding:56px 0 30px;background:rgba(0,
 <section id="results" style="background:rgba(255,255,255,.02);">
   <div class="wrap">
     <div class="head">
-      <span class="eyebrow">Illustrative examples</span>
-      <h2>See how investigation evidence can be presented</h2>
-      <p>Illustrative interface concepts only. They are not client records, verified results, or promises of recovery.</p>
+      <span class="eyebrow">Investigation services</span>
+      <h2>Focused analysis for difficult situations</h2>
+      <p>Our work centers on organizing public blockchain information into clear, practical findings.</p>
     </div>
-    <p class="sample-notice"><strong>Important:</strong> The following visuals are fictional design examples, not evidence of completed investigations or recovered assets.</p>
     <div class="proof-grid">
       <div class="proof">
-        <div style="padding:10px 14px;background:rgba(0,0,0,.5);border-bottom:1px solid var(--border);font-family:monospace;font-size:.7rem;color:#7f90a8;">etherscan.io/tx/0x8f2a…c41</div>
-        <div class="shot-body">
-          <div class="mono-row"><span>0x8f2a…c41</span><span class="neg">−210,000 USDT</span></div>
-          <div class="mono-row"><span>0x7be1…9d02</span><span class="neg">−148,500 USDT</span></div>
-          <div class="mono-row"><span>0x9d10…3b88</span><span class="pos">FROZEN ✔</span></div>
-        </div>
-        <div class="proof-body"><h4>Transaction tracing concept</h4><p>Example of how transaction hops might be visualized.</p><div class="tag">Illustrative example</div></div>
+        <div class="shot-body"><div class="icon">⌁</div><div class="mono-row"><span>Transaction paths</span><span class="pos">On-chain review</span></div><div class="mono-row"><span>Transfers and interactions</span><span>Network data</span></div></div>
+        <div class="proof-body"><h4>Transaction tracing</h4><p>Review the movement of assets through public transaction records.</p><div class="tag">Blockchain analysis</div></div>
       </div>
       <div class="proof">
-        <div style="padding:10px 14px;background:rgba(0,0,0,.5);border-bottom:1px solid var(--border);font-family:monospace;font-size:.7rem;color:#7f90a8;">cluster-view / case BC-2611</div>
-        <div style="height:160px;background:rgba(3,6,13,.6);display:flex;align-items:center;justify-content:center;">
+        <div style="height:160px;background:#f2f7f7;display:flex;align-items:center;justify-content:center;">
           <svg width="200" height="100" viewBox="0 0 200 100">
             <line x1="40" y1="30" x2="100" y2="60" stroke="#2a3a55" stroke-width="2"/>
             <line x1="100" y1="60" x2="160" y2="30" stroke="#2a3a55" stroke-width="2"/>
-            <circle cx="40" cy="30" r="8" fill="#3b82f6"/><circle cx="160" cy="30" r="8" fill="#8b5cf6"/>
-            <circle cx="100" cy="60" r="12" fill="#00e5a0"/>
+            <circle cx="40" cy="30" r="8" fill="#397e98"/><circle cx="160" cy="30" r="8" fill="#6577a5"/>
+            <circle cx="100" cy="60" r="12" fill="#167d68"/>
           </svg>
         </div>
-        <div class="proof-body"><h4>Wallet mapping concept</h4><p>Example relationship diagram; no attribution is implied.</p><div class="tag">Illustrative example</div></div>
+        <div class="proof-body"><h4>Address relationships</h4><p>Compare observable transaction patterns while treating attribution carefully.</p><div class="tag">Activity mapping</div></div>
       </div>
       <div class="proof">
-        <div style="padding:10px 14px;background:rgba(0,0,0,.5);border-bottom:1px solid var(--border);font-family:monospace;font-size:.7rem;color:#7f90a8;">freeze-request / FINAL.pdf</div>
-        <div class="shot-body" style="background:#fff; align-items:flex-start; padding:20px;">
-           <div style="width:60%;height:8px;background:#ddd;margin-bottom:8px;"></div>
-           <div style="width:80%;height:8px;background:#ddd;margin-bottom:8px;"></div>
-           <div style="width:40%;height:8px;background:#ddd;"></div>
-           <div style="margin-top:auto; align-self:flex-end; color:#00a070; border:2px solid #00a070; padding:4px 8px; font-weight:bold; transform:rotate(-10deg);">APPROVED</div>
-        </div>
-        <div class="proof-body"><h4>Document layout concept</h4><p>Placeholder design only; no exchange action is represented.</p><div class="tag">Illustrative example</div></div>
+        <div class="shot-body"><div class="icon">▤</div><div class="mono-row"><span>Investigation summary</span><span class="pos">Clear findings</span></div><div class="mono-row"><span>Evidence, context, limitations</span><span>Organized</span></div></div>
+        <div class="proof-body"><h4>Case documentation</h4><p>Organize transaction references and findings for clear discussion with relevant professionals.</p><div class="tag">Case support</div></div>
       </div>
     </div>
   </div>
@@ -627,65 +566,6 @@ footer{border-top:1px solid var(--border);padding:56px 0 30px;background:rgba(0,
   });
   contactLink.addEventListener('click', closeNavigation);
 
-  // Illustrative dashboard values only; replace with a verified data source before presenting live metrics.
-  const sampleNetworks = [
-    { name: 'Bitcoin', reference: 'Sample block B-01', index: 42, series: { '24h': [34, 42, 38, 51, 45, 59, 48], '7d': [38, 45, 41, 52, 48, 57, 42], '30d': [31, 39, 44, 36, 49, 53, 46] } },
-    { name: 'Ethereum', reference: 'Sample block E-01', index: 67, series: { '24h': [52, 61, 58, 70, 63, 76, 67], '7d': [55, 62, 58, 72, 66, 75, 67], '30d': [48, 57, 64, 59, 71, 68, 67] } },
-    { name: 'Solana', reference: 'Sample block S-01', index: 84, series: { '24h': [70, 78, 73, 86, 81, 92, 84], '7d': [66, 74, 71, 83, 78, 91, 84], '30d': [61, 69, 77, 73, 85, 89, 84] } }
-  ];
-  const chartLabels = { '24h': ['00', '04', '08', '12', '16', '20', '24'], '7d': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], '30d': ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7'] };
-  const networkFilter = document.getElementById('networkFilter');
-  const periodFilter = document.getElementById('periodFilter');
-  const activityChart = document.getElementById('activityChart');
-  const activityChartTitle = document.getElementById('activityChartTitle');
-  const networkTableBody = document.getElementById('networkTableBody');
-
-  function renderDashboard() {
-    const selectedNetworks = networkFilter.value === 'all'
-      ? sampleNetworks
-      : sampleNetworks.filter(network => network.name === networkFilter.value);
-    const period = periodFilter.value;
-    const values = chartLabels[period].map((_, index) =>
-      Math.round(selectedNetworks.reduce((total, network) => total + network.series[period][index], 0) / selectedNetworks.length)
-    );
-
-    activityChart.replaceChildren();
-    values.forEach((value, index) => {
-      const column = document.createElement('div');
-      column.className = 'chart-column';
-      const bar = document.createElement('span');
-      bar.className = 'chart-bar';
-      bar.style.height = `${value}%`;
-      bar.setAttribute('aria-hidden', 'true');
-      const label = document.createElement('span');
-      label.className = 'chart-label';
-      label.textContent = chartLabels[period][index];
-      column.append(bar, label);
-      activityChart.append(column);
-    });
-
-    activityChartTitle.textContent = `Relative activity · ${networkFilter.value === 'all' ? 'All networks' : networkFilter.value} · ${period === '24h' ? '24 hours' : period === '7d' ? '7 days' : '30 days'}`;
-    networkTableBody.replaceChildren();
-    selectedNetworks.forEach(network => {
-      const row = document.createElement('tr');
-      [network.name, network.reference, String(network.index)].forEach(value => {
-        const cell = document.createElement('td');
-        cell.textContent = value;
-        row.append(cell);
-      });
-      const typeCell = document.createElement('td');
-      const tag = document.createElement('span');
-      tag.className = 'sample-tag';
-      tag.textContent = 'Illustrative';
-      typeCell.append(tag);
-      row.append(typeCell);
-      networkTableBody.append(row);
-    });
-  }
-  networkFilter.addEventListener('change', renderDashboard);
-  periodFilter.addEventListener('change', renderDashboard);
-  renderDashboard();
-
   // 3. MODAL LOGIC
   const wpModal = document.getElementById('wpModal');
   let modalOpener;
@@ -762,82 +642,7 @@ footer{border-top:1px solid var(--border);padding:56px 0 30px;background:rgba(0,
     }
   });
 
-  // 5. CANVAS PARTICLES (CELL ANIMATION)
-  const canvas = document.getElementById('particleCanvas');
-  const ctx = canvas.getContext('2d');
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
-  let particlesArray = [];
-  let animationFrame;
-
-  function setCanvasSize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  setCanvasSize();
-  window.addEventListener('resize', () => {
-    setCanvasSize();
-    init();
-  });
-
-  class Particle {
-    constructor() {
-      this.x = Math.random() * canvas.width;
-      this.y = Math.random() * canvas.height;
-      this.size = Math.random() * 2 + 1;
-      this.speedX = Math.random() * 1 - 0.5;
-      this.speedY = Math.random() * 1 - 0.5;
-    }
-    update() {
-      this.x += this.speedX; this.y += this.speedY;
-      if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-      if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-    }
-    draw() {
-      ctx.fillStyle = 'rgba(0, 229, 160, 0.4)';
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-
-  function init() {
-    particlesArray = [];
-    const count = Math.min(70, Math.floor((canvas.width * canvas.height) / 22000));
-    for (let i = 0; i < count; i++) particlesArray.push(new Particle());
-  }
-  init();
-
-  function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (let i = 0; i < particlesArray.length; i++) {
-      particlesArray[i].update();
-      particlesArray[i].draw();
-      for (let j = i; j < particlesArray.length; j++) {
-        const dx = particlesArray[i].x - particlesArray[j].x;
-        const dy = particlesArray[i].y - particlesArray[j].y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < 120) {
-          ctx.beginPath();
-          ctx.strokeStyle = `rgba(0, 229, 160, ${1 - distance/120})`;
-          ctx.lineWidth = 0.5;
-          ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
-          ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
-          ctx.stroke();
-        }
-      }
-    }
-    animationFrame = requestAnimationFrame(animate);
-  }
-  if (!motionPreference.matches) animate();
-  motionPreference.addEventListener('change', () => {
-    if (motionPreference.matches) {
-      cancelAnimationFrame(animationFrame);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    } else {
-      animate();
-    }
-  });
-
   if (!motionPreference.matches && 'IntersectionObserver' in window) {
     const revealObserver = new IntersectionObserver(entries => {
       entries.forEach(entry => {
