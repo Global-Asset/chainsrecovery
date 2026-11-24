@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="scroll-behavior: smooth;">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="description" content="ChainRecover — blockchain forensics and crypto asset recovery." />
+<meta name="keywords" content="crypto recovery, blockchain forensics, stolen crypto, wallet recovery, tracing" />
+<meta property="og:title" content="ChainRecover — Blockchain Recovery & Forensics" />
+<meta property="og:description" content="Recover what was lost on the blockchain. Expert on-chain forensics and asset tracing." />
+<meta property="og:type" content="website" />
 <title>ChainRecover — Blockchain Recovery & Forensics</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,12 +43,21 @@ header.scrolled{background:rgba(3,5,10,.85);backdrop-filter:blur(20px);border-bo
 .nav-links{display:flex;align-items:center;gap:4px}
 .nav-links a{padding:9px 14px;border-radius:10px;font-size:.9rem;font-weight:500;color:var(--muted);transition:.2s}
 .nav-links a:hover{color:var(--text);background:rgba(255,255,255,.06)}
+.nav-cta{display:flex;align-items:center;gap:12px}
+
+/* MOBILE MENU */
+.menu-btn { display: none; font-size: 1.5rem; color: var(--text); cursor: pointer; padding: 5px; }
+.mobile-menu { display: none; position: absolute; top: 76px; left: 0; right: 0; background: rgba(11, 19, 34, 0.98); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); flex-direction: column; padding: 20px; gap: 10px; z-index: 99; }
+.mobile-menu a { padding: 12px; border-radius: 8px; font-weight: 600; color: var(--text); text-align: center; background: rgba(255,255,255,0.03); }
+.mobile-menu a:hover { background: rgba(0,229,160,0.1); color: var(--acc); }
+.mobile-menu.open { display: flex; }
+
+/* BUTTONS */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:13px 24px;border-radius:12px;font-weight:700;font-size:.95rem;transition:.25s;border:1px solid transparent}
 .btn-primary{background:linear-gradient(135deg,var(--acc),#00b8d4);color:#03130d;box-shadow:0 10px 25px -8px rgba(0,229,160,.6)}
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 30px -8px rgba(0,229,160,.8)}
 .btn-ghost{background:rgba(255,255,255,.05);border-color:var(--border);color:var(--text)}
 .btn-ghost:hover{background:rgba(255,255,255,.1);transform:translateY(-2px)}
-.nav-cta{display:flex;align-items:center;gap:12px}
 
 /* GOOGLE TRANSLATE */
 .lang-pill{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:11px;background:rgba(255,255,255,.05);border:1px solid var(--border)}
@@ -66,6 +79,14 @@ h1{font-size:clamp(2.5rem,5vw,4.5rem);line-height:1.05;letter-spacing:-2.5px;fon
 .trust{display:flex;align-items:center;gap:18px;flex-wrap:wrap;font-size:.85rem;color:var(--muted)}
 .trust .item{display:flex;align-items:center;gap:7px}
 
+/* LIVE CASE CARD */
+.live-case-card { background:linear-gradient(165deg, rgba(0,229,160,0.1), rgba(0,0,0,0.6)); border-color:rgba(0,229,160,0.4); }
+.live-header { display:flex;justify-content:space-between;color:var(--muted);font-size:.85rem;margin-bottom:20px; }
+.live-amount { font-size:2.4rem;font-weight:800;color:var(--acc);margin-bottom:15px;letter-spacing:-1.5px;text-shadow:0 0 20px rgba(0,229,160,0.3); }
+.progress-bg { height:8px;background:rgba(255,255,255,.1);border-radius:10px;overflow:hidden;margin-bottom:12px; }
+.progress-bar { width:78%;height:100%;background:linear-gradient(90deg,var(--acc),#00b8d4);box-shadow:0 0 10px var(--acc); }
+.live-steps { display:flex;flex-direction:column;gap:12px;font-size:.9rem; }
+
 /* GLASS CARD & SECTIONS */
 section{padding:100px 0;position:relative;}
 .head{max-width:680px;margin:0 auto 60px;text-align:center}
@@ -78,6 +99,13 @@ h2{font-size:clamp(1.9rem,3.6vw,2.9rem);line-height:1.15;letter-spacing:-1.2px;f
 .icon{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;margin-bottom:22px;background:rgba(0,229,160,.12);color:var(--acc);font-size:1.8rem;box-shadow:inset 0 0 20px rgba(0,229,160,0.1)}
 .card h3{font-size:1.2rem;font-weight:700;margin-bottom:12px}
 .card p{font-size:.95rem;color:var(--muted)}
+
+/* STATS BANNER */
+.stats-banner { border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:rgba(255,255,255,.01);backdrop-filter:blur(10px); }
+.stats-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:20px;padding:46px 22px;text-align:center; }
+.stat-num { font-size:2.2rem;font-weight:800;color:#fff;letter-spacing:-1px; }
+.stat-num.acc { color:var(--acc); }
+.stat-label { color:var(--muted);font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase; }
 
 /* PROOF GALLERY */
 .proof-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
@@ -106,6 +134,10 @@ h2{font-size:clamp(1.9rem,3.6vw,2.9rem);line-height:1.15;letter-spacing:-1.2px;f
 .wp-chapters li{padding:12px 0;border-bottom:1px dashed rgba(255,255,255,.1);font-size:.95rem;color:#cfd9e8;display:flex;align-items:center;gap:10px;}
 .wp-chapters li::before{content:'▪';color:var(--acc);font-size:1.2rem;}
 .wp-chapters li:last-child{border:none}
+
+/* FAQ */
+.faq-list { display:flex;flex-direction:column;gap:16px; }
+.faq-list h4 { margin-bottom:8px;color:#fff; }
 
 /* CONTACT */
 .contact-wrap{display:grid;grid-template-columns:.85fr 1.15fr;gap:60px;align-items:start}
@@ -140,9 +172,14 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;background:rgba(3,
 
 @media(max-width:980px){
   .hero-grid,.cards,.proof-grid,.t-grid,.wp-inner,.contact-wrap,.f-grid2{grid-template-columns:1fr}
-  .nav-links{display:none}
+  .nav-links,.nav-cta .btn-primary{display:none}
+  .menu-btn { display: block; }
   .hero{padding-top:120px}
-  .modal-body{padding:20px;}
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .wp-inner { padding: 30px 20px; }
+  .form { padding: 25px; }
+  .f-grid { grid-template-columns: 1fr; }
+  .f-bottom { flex-direction: column; gap: 10px; text-align: center; }
 }
 </style>
 </head>
@@ -156,6 +193,7 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;background:rgba(3,
       <span class="mark"><svg viewBox="0 0 24 24"><path d="M12 2 3 7v10l9 5 9-5V7l-9-5Z"/><path d="M12 22V12"/><path d="M3 7l9 5 9-5"/></svg></span>
       <span>ChainRecover<small>Blockchain Forensics</small></span>
     </a>
+    
     <nav class="nav-links">
       <a href="#services">Services</a>
       <a href="#results">Case Results</a>
@@ -163,10 +201,22 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;background:rgba(3,
       <a href="#whitepaper">Whitepaper</a>
       <a href="#faq">FAQ</a>
     </nav>
+
     <div class="nav-cta">
       <div class="lang-pill"><div id="google_translate_element"></div></div>
       <a href="/wallet.html" class="btn btn-primary" style="padding:10px 22px;font-size:.9rem;">My Wallet</a>
+      <button class="menu-btn" onclick="toggleMenu()">☰</button>
     </div>
+  </div>
+
+  <!-- Mobile Menu Dropdown -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#services" onclick="toggleMenu()">Services</a>
+    <a href="#results" onclick="toggleMenu()">Case Results</a>
+    <a href="#testimonials" onclick="toggleMenu()">Testimonials</a>
+    <a href="#whitepaper" onclick="toggleMenu()">Whitepaper</a>
+    <a href="#faq" onclick="toggleMenu()">FAQ</a>
+    <a href="/wallet.html" style="background:var(--acc); color:#03130d; margin-top:10px;">Access My Wallet</a>
   </div>
 </header>
 
@@ -186,13 +236,18 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;background:rgba(3,
         <div class="item">⚖️ Court-ready reports</div>
       </div>
     </div>
-    <div class="card" style="background:linear-gradient(165deg, rgba(0,229,160,0.1), rgba(0,0,0,0.6)); border-color:rgba(0,229,160,0.4);">
-      <div style="display:flex;justify-content:space-between;color:var(--muted);font-size:.85rem;margin-bottom:20px;"><span><span class="pulse" style="display:inline-block;margin-right:5px;width:6px;height:6px;border-radius:50%;background:var(--acc)"></span> LIVE CASE #BC-2847</span><span style="color:var(--acc);font-weight:bold;">TRACING</span></div>
+    
+    <!-- Live Case Card -->
+    <div class="card live-case-card">
+      <div class="live-header">
+        <span><span class="pulse" style="display:inline-block;margin-right:5px;width:6px;height:6px;border-radius:50%;background:var(--acc)"></span> LIVE CASE #BC-2847</span>
+        <span style="color:var(--acc);font-weight:bold;">TRACING</span>
+      </div>
       <div style="font-size:.85rem;color:var(--muted)">Assets traced</div>
-      <div style="font-size:2.4rem;font-weight:800;color:var(--acc);margin-bottom:15px;letter-spacing:-1.5px;text-shadow:0 0 20px rgba(0,229,160,0.3);">$1,284,900</div>
-      <div style="height:8px;background:rgba(255,255,255,.1);border-radius:10px;overflow:hidden;margin-bottom:12px;"><div style="width:78%;height:100%;background:linear-gradient(90deg,var(--acc),#00b8d4);box-shadow:0 0 10px var(--acc);"></div></div>
+      <div class="live-amount">$1,284,900</div>
+      <div class="progress-bg"><div class="progress-bar"></div></div>
       <div style="font-size:.85rem;color:var(--muted);margin-bottom:25px;">78% of funds traced to 4 exchange deposit wallets</div>
-      <div style="display:flex;flex-direction:column;gap:12px;font-size:.9rem;">
+      <div class="live-steps">
         <div style="color:#fff;">✅ Wallet cluster identified</div>
         <div style="color:#fff;">✅ Bridge hop traced (2 chains)</div>
         <div style="color:var(--acc);">⏳ Exchange freeze request in progress</div>
@@ -201,12 +256,13 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;background:rgba(3,
   </div>
 </section>
 
-<div style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:rgba(255,255,255,.01);backdrop-filter:blur(10px);">
-  <div class="wrap" style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;padding:46px 22px;text-align:center;">
-    <div><div style="font-size:2.2rem;font-weight:800;color:#fff;letter-spacing:-1px;">6+</div><small style="color:var(--muted);font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;">Years Experience</small></div>
-    <div><div style="font-size:2.2rem;font-weight:800;color:#fff;letter-spacing:-1px;">1,240+</div><small style="color:var(--muted);font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;">Cases Analysed</small></div>
-    <div><div style="font-size:2.2rem;font-weight:800;color:var(--acc);letter-spacing:-1px;">92%</div><small style="color:var(--muted);font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;">Trace Success Rate</small></div>
-    <div><div style="font-size:2.2rem;font-weight:800;color:#fff;letter-spacing:-1px;">48H</div><small style="color:var(--muted);font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;">Avg. First Report</small></div>
+<!-- Stats Banner -->
+<div class="stats-banner">
+  <div class="wrap stats-grid">
+    <div><div class="stat-num">6+</div><small class="stat-label">Years Experience</small></div>
+    <div><div class="stat-num">1,240+</div><small class="stat-label">Cases Analysed</small></div>
+    <div><div class="stat-num acc">92%</div><small class="stat-label">Trace Success Rate</small></div>
+    <div><div class="stat-num">48H</div><small class="stat-label">Avg. First Report</small></div>
   </div>
 </div>
 
@@ -278,19 +334,19 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;background:rgba(3,
     </div>
     <div class="t-grid">
       <div class="t-card">
-        <div class="t-top"><img src="https://i.pravatar.cc/150?img=11" class="avatar" alt="James"><div><b>James M.</b><br><small style="color:var(--muted)">London, UK</small></div></div>
+        <div class="t-top"><img src="https://i.pravatar.cc/150?img=11" class="avatar" alt="James" loading="lazy"><div><b>James M.</b><br><small style="color:var(--muted)">London, UK</small></div></div>
         <div class="stars">★★★★★</div>
         <p>"I lost 212,000 USDT to a fake yield platform. Within 11 days they had mapped the whole chain to an exchange and got the account frozen."</p>
         <div class="recovered">Recovered $165,000</div>
       </div>
       <div class="t-card">
-        <div class="t-top"><img src="https://i.pravatar.cc/150?img=5" class="avatar" alt="Amaka"><div><b>Amaka O.</b><br><small style="color:var(--muted)">Lagos, Nigeria</small></div></div>
+        <div class="t-top"><img src="https://i.pravatar.cc/150?img=5" class="avatar" alt="Amaka" loading="lazy"><div><b>Amaka O.</b><br><small style="color:var(--muted)">Lagos, Nigeria</small></div></div>
         <div class="stars">★★★★★</div>
         <p>"They were the only ones who did not ask for my seed phrase. They traced my stolen BNB through a mixer and gave me a report."</p>
         <div class="recovered">Recovered $38,400</div>
       </div>
       <div class="t-card">
-        <div class="t-top"><img src="https://i.pravatar.cc/150?img=33" class="avatar" alt="Daniel"><div><b>Daniel K.</b><br><small style="color:var(--muted)">Toronto, Canada</small></div></div>
+        <div class="t-top"><img src="https://i.pravatar.cc/150?img=33" class="avatar" alt="Daniel" loading="lazy"><div><b>Daniel K.</b><br><small style="color:var(--muted)">Toronto, Canada</small></div></div>
         <div class="stars">★★★★★</div>
         <p>"A corrupted keystore file locked me out of a wallet holding 4.2 ETH. Their recovery was careful and offline. I had access back in a week."</p>
         <div class="recovered">Wallet access restored</div>
@@ -325,18 +381,18 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;background:rgba(3,
       <span class="eyebrow">FAQ</span>
       <h2>Common Questions</h2>
     </div>
-    <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="faq-list">
       <div class="card">
-        <h4 style="margin-bottom:8px;color:#fff;">Can stolen crypto actually be recovered?</h4>
-        <p style="font-size:.95rem;">Sometimes, yes. Once funds reach a centralised exchange, a freeze request can work. We give you an honest assessment before you pay anything.</p>
+        <h4>Can stolen crypto actually be recovered?</h4>
+        <p style="font-size:.95rem; color:var(--muted);">Sometimes, yes. Once funds reach a centralised exchange, a freeze request can work. We give you an honest assessment before you pay anything.</p>
       </div>
       <div class="card">
-        <h4 style="margin-bottom:8px;color:#fff;">How much does a case review cost?</h4>
-        <p style="font-size:.95rem;">The initial review is free. If we take the case, our fee structure is agreed in writing beforehand and is success-based.</p>
+        <h4>How much does a case review cost?</h4>
+        <p style="font-size:.95rem; color:var(--muted);">The initial review is free. If we take the case, our fee structure is agreed in writing beforehand and is success-based.</p>
       </div>
       <div class="card">
-        <h4 style="margin-bottom:8px;color:#fff;">What do you need from me to begin?</h4>
-        <p style="font-size:.95rem;">Transaction hashes, wallet addresses, and a description. Never send a seed phrase or private key — we will never ask for one.</p>
+        <h4>What do you need from me to begin?</h4>
+        <p style="font-size:.95rem; color:var(--muted);">Transaction hashes, wallet addresses, and a description. Never send a seed phrase or private key — we will never ask for one.</p>
       </div>
     </div>
   </div>
@@ -419,7 +475,12 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;background:rgba(3,
 <div class="toast" id="toast"><div><b id="toastTitle" style="font-size:1rem;color:var(--acc);">Done</b><br><span id="toastMsg" style="color:var(--muted);"></span></div></div>
 
 <script>
-  // 1. GOOGLE TRANSLATE
+  // 1. MOBILE MENU TOGGLE
+  function toggleMenu() {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  }
+
+  // 2. GOOGLE TRANSLATE
   function googleTranslateElementInit() {
     new google.translate.TranslateElement({
       pageLanguage: 'en',
@@ -428,19 +489,19 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;background:rgba(3,
     }, 'google_translate_element');
   }
 
-  // 2. HEADER SCROLL EFFECT
+  // 3. HEADER SCROLL EFFECT
   window.addEventListener('scroll', () => {
     document.getElementById('header').classList.toggle('scrolled', window.scrollY > 20);
   });
 
-  // 3. WHITEPAPER MODAL
+  // 4. WHITEPAPER MODAL
   function openModal() { document.getElementById('wpModal').classList.add('open'); document.body.style.overflow = 'hidden'; }
   function closeModal(e) {
     if(e && e.target !== document.getElementById('wpModal') && e.target.className !== 'modal') return;
     document.getElementById('wpModal').classList.remove('open'); document.body.style.overflow = '';
   }
 
-  // 4. CONTACT FORM SUBMIT
+  // 5. CONTACT FORM SUBMIT
   document.getElementById('contactForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = e.target.querySelector('button');
@@ -471,7 +532,7 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;background:rgba(3,
     }
   });
 
-  // 5. LIGHTWEIGHT MOBILE-FRIENDLY CANVAS ANIMATION
+  // 6. LIGHTWEIGHT MOBILE-FRIENDLY CANVAS ANIMATION
   const canvas = document.getElementById('particleCanvas');
   const ctx = canvas.getContext('2d');
   let particlesArray = [];
@@ -506,7 +567,8 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;background:rgba(3,
 
   function init() {
     particlesArray = [];
-    const count = Math.min(60, (canvas.width * canvas.height) / 12000); 
+    // Reduced count for better mobile performance
+    const count = Math.min(50, (canvas.width * canvas.height) / 15000); 
     for (let i = 0; i < count; i++) particlesArray.push(new Particle());
   }
   init();
