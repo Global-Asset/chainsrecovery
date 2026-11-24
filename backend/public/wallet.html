@@ -117,7 +117,10 @@
   </div>
 
   <script>
-    const API_BASE = ''; // Empty because frontend and backend are on the same server!
+    const API_BASE = ''; 
+    
+    // FIXED: Moved prices outside so they can be accessed by openCoin()
+    const prices = { BNB: 580, BTC: 67000, ETH: 3400, MATIC: 0.7, ECE: 1, USDT: 1, USDC: 1, SOL: 145, TRX: 0.13 };
     
     function show(id) {
       ['loginView','registerView','otpView','dashView'].forEach(v => document.getElementById(v).classList.add('hidden'));
@@ -141,7 +144,15 @@
         const data = await res.json();
         if(!res.ok) throw new Error(data.error || 'Failed to register');
         
-        alert('Account created! Check your email for the OTP code.');
+        // --- FIXED: Handle devOtp for testing ---
+        if (data.devOtp) {
+          alert(`Account created! Your TEST OTP is: ${data.devOtp}`);
+          document.getElementById('otpCode').value = data.devOtp; // Auto-fill
+        } else {
+          alert('Account created! Check your email for the OTP code.');
+        }
+        // ---------------------------------------
+
         show('otpView');
         window.currentEmail = document.getElementById('regEmail').value;
       } catch (err) { alert(err.message); }
@@ -190,7 +201,6 @@
         document.getElementById('myWalletAddr').innerText = data.walletAddress;
         show('dashView');
         
-        const prices = { BNB: 580, BTC: 67000, ETH: 3400, MATIC: 0.7, ECE: 1, USDT: 1, USDC: 1, SOL: 145, TRX: 0.13 };
         let total = 0;
         let html = '';
         
