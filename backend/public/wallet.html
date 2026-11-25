@@ -1,97 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>My Wallet</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; }
-  body { 
-    background: #05070e; 
-    color: #e9eefb; 
-    font-family: system-ui, -apple-system, sans-serif; 
-    margin: 0; 
-    padding: 20px; 
-    min-height: 100vh;
-  }
-  .card { 
-    background: #0b1322; 
-    padding: 25px; 
-    border-radius: 15px; 
-    max-width: 450px; 
-    margin: 40px auto; 
-    border: 1px solid #1a2a3a; 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-  }
+  body { background: #05070e; color: #e9eefb; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 20px; min-height: 100vh; }
+  .card { background: #0b1322; padding: 25px; border-radius: 15px; max-width: 450px; margin: 40px auto; border: 1px solid #1a2a3a; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
   h2 { margin-top: 0; margin-bottom: 20px; font-weight: 600; }
-  input { 
-    width: 100%; 
-    padding: 14px; 
-    margin: 8px 0 16px; 
-    background: #05070e; 
-    border: 1px solid #2a3a4a; 
-    color: white; 
-    border-radius: 8px; 
-    outline: none;
-  }
+  input, select { width: 100%; padding: 14px; margin: 8px 0 16px; background: #05070e; border: 1px solid #2a3a4a; color: white; border-radius: 8px; outline: none; }
   input:focus { border-color: #00e5a0; }
-  button { 
-    width: 100%; 
-    padding: 14px; 
-    background: #00e5a0; 
-    color: #03130d; 
-    border: none; 
-    border-radius: 8px; 
-    font-weight: 700; 
-    font-size: 15px;
-    cursor: pointer; 
-    transition: 0.2s; 
-  }
+  button { width: 100%; padding: 14px; background: #00e5a0; color: #03130d; border: none; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer; transition: 0.2s; }
   button:hover { background: #00c98c; }
   .hidden { display: none !important; }
   
   /* Dashboard Styles */
-  .total-box { 
-    text-align: center; 
-    margin-bottom: 25px; 
-    background: rgba(0, 229, 160, 0.08); 
-    padding: 20px; 
-    border-radius: 12px; 
-    border: 1px solid rgba(0, 229, 160, 0.2); 
-  }
-  .total-label { 
-    color: #93a1b8; 
-    font-size: 12px; 
-    text-transform: uppercase; 
-    letter-spacing: 1.5px; 
-    font-weight: 600;
-  }
-  .total-value { 
-    font-size: 36px; 
-    font-weight: 800; 
-    color: #00e5a0; 
-    margin-top: 8px; 
-    letter-spacing: -1px;
-  }
-  .address-box { 
-    background: #05070e; 
-    padding: 15px; 
-    border-radius: 10px; 
-    border: 1px solid #1a2a3a; 
-    margin-bottom: 25px; 
-  }
-  .coin-row { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    padding: 15px 0; 
-    border-bottom: 1px solid #1a2a3a; 
-  }
-  .coin-row:last-child { border-bottom: none; }
+  .locked-banner { background: rgba(255, 107, 129, 0.1); border: 1px solid #ff6b81; color: #ff6b81; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-weight: bold; text-align: center; }
+  .total-box { text-align: center; margin-bottom: 25px; background: rgba(0, 229, 160, 0.08); padding: 20px; border-radius: 12px; border: 1px solid rgba(0, 229, 160, 0.2); }
+  .total-label { color: #93a1b8; font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
+  .total-value { font-size: 36px; font-weight: 800; color: #00e5a0; margin-top: 8px; letter-spacing: -1px; }
+  .address-box { background: #05070e; padding: 15px; border-radius: 10px; border: 1px solid #1a2a3a; margin-bottom: 25px; }
+  .coin-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #1a2a3a; cursor: pointer; transition: 0.2s; border-radius: 8px; }
+  .coin-row:hover { background: rgba(0, 229, 160, 0.05); }
   .coin-name { font-weight: 700; font-size: 16px; }
   .coin-balance { text-align: right; }
   .coin-amount { font-size: 16px; font-weight: 600; }
   .coin-usd { font-size: 13px; color: #93a1b8; margin-top: 4px; }
+  
+  /* Modal Styles */
+  .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100; backdrop-filter: blur(5px); }
+  .modal.open { display: flex; }
+  .modal-content { background: #0b1322; width: 100%; max-width: 400px; padding: 25px; border-radius: 15px; border: 1px solid #00e5a0; max-height: 90vh; overflow-y: auto; }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .modal-header h3 { margin: 0; color: #00e5a0; }
+  .close-btn { background: #ff6b81; color: white; width: auto; padding: 5px 12px; border-radius: 6px; font-size: 14px; }
+  .action-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
+  .action-buttons button { background: #1a2a3a; color: white; font-size: 13px; padding: 10px; }
+  .action-buttons button:hover { background: #2a3a4a; }
+  .action-buttons button.active { background: #00e5a0; color: #03130d; font-weight: bold; }
+  .panel { background: #05070e; padding: 15px; border-radius: 10px; border: 1px solid #1a2a3a; margin-bottom: 20px; }
+  .tx-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #1a2a3a; font-size: 13px; }
+  .tx-item:last-child { border-bottom: none; }
+  .tx-in { color: #00e5a0; font-weight: bold; }
+  .tx-out { color: #ff6b81; font-weight: bold; }
 </style>
 </head>
 <body>
@@ -120,92 +71,110 @@
 
   <!-- DASHBOARD VIEW -->
   <div id="dashView" class="card hidden">
+    
+    <!-- SUSPENDED ACCOUNT BANNER -->
+    <div id="lockedBanner" class="locked-banner hidden">
+      🚫 Account Suspended: <span id="lockReason"></span>
+    </div>
+
     <h2>My Wallet</h2>
     
-    <!-- TOTAL PORTFOLIO -->
     <div class="total-box">
       <div class="total-label">Total Portfolio Value</div>
       <div class="total-value" id="totalUsdValue">$0.00</div>
     </div>
 
-    <!-- WALLET ADDRESS -->
     <div class="address-box">
       <small style="color:#93a1b8; font-weight:600;">Wallet Address</small>
       <div id="walletAddress" style="font-family:monospace; font-size:13px; color:#00e5a0; word-break:break-all; margin-top:8px;"></div>
     </div>
     
-    <!-- ASSETS LIST -->
-    <h3 style="margin-bottom:10px; font-size: 15px; color: #93a1b8; text-transform: uppercase; letter-spacing: 1px;">Assets</h3>
+    <h3 style="margin-bottom:10px; font-size: 15px; color: #93a1b8; text-transform: uppercase;">Assets (Click to manage)</h3>
     <div id="balanceList"></div>
     
     <button onclick="logout()" style="background:#ff6b81; color:white; margin-top:30px;">Sign Out</button>
   </div>
 
+  <!-- COIN MODAL (The pop-up dashboard) -->
+  <div class="modal" id="coinModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalCoinName">BTC</h3>
+        <button class="close-btn" onclick="closeModal()">X</button>
+      </div>
+      
+      <div style="font-size: 24px; font-weight: bold; margin-bottom: 5px;" id="modalBalance">0.0000</div>
+      <div style="color: #93a1b8; margin-bottom: 20px;" id="modalUsd">$0.00</div>
+
+      <div class="action-buttons">
+        <button onclick="showPanel('deposit')" id="btnDeposit">Deposit</button>
+        <button onclick="showPanel('send')" id="btnSend">Send</button>
+        <button onclick="showPanel('withdraw')" id="btnWithdraw">Withdraw</button>
+        <button onclick="showPanel('history')" id="btnHistory">History</button>
+      </div>
+
+      <!-- DEPOSIT PANEL -->
+      <div id="panel-deposit" class="panel hidden">
+        <p style="font-size: 13px; color: #93a1b8; margin-bottom: 10px;">Send funds to this address:</p>
+        <div style="font-family: monospace; color: #00e5a0; word-break: break-all; background: #0b1322; padding: 10px; border-radius: 8px;" id="depositAddress"></div>
+      </div>
+
+      <!-- SEND PANEL -->
+      <div id="panel-send" class="panel hidden">
+        <input type="text" id="sendAddress" placeholder="Receiver Address">
+        <input type="number" id="sendAmount" placeholder="Amount">
+        <button onclick="submitSend()">Send Funds</button>
+      </div>
+
+      <!-- WITHDRAW PANEL -->
+      <div id="panel-withdraw" class="panel hidden">
+        <input type="text" id="wdAddress" placeholder="External Wallet Address">
+        <input type="number" id="wdAmount" placeholder="Amount">
+        <button onclick="submitWithdraw()">Request Withdrawal</button>
+      </div>
+
+      <!-- HISTORY PANEL -->
+      <div id="panel-history" class="panel hidden">
+        <div id="historyList" style="max-height: 200px; overflow-y: auto;">
+          <!-- Transactions load here -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <script>
-    // --- 1. LIVE PRICES MAPPING ---
-    // We map your database coin names to CoinGecko's official IDs
-    const coinGeckoIds = {
-        BNB: 'binancecoin',
-        BTC: 'bitcoin',
-        ETH: 'ethereum',
-        MATIC: 'matic-network',
-        ECE: 'ece', // Note: If CoinGecko doesn't have 'ece', it will just show $0.00
-        USDT: 'tether',
-        USDC: 'usd-coin',
-        SOL: 'solana',
-        TRX: 'tron'
-    };
+    const coinGeckoIds = { BNB: 'binancecoin', BTC: 'bitcoin', ETH: 'ethereum', MATIC: 'matic-network', ECE: 'ece', USDT: 'tether', USDC: 'usd-coin', SOL: 'solana', TRX: 'tron' };
+    let livePrices = {};
+    let currentCoin = '';
+    let isAccountLocked = false;
 
-    let livePrices = {}; // Stores the current prices
-
-    // --- 2. UI NAVIGATION ---
     function show(id) {
       ['loginView','registerView','dashView'].forEach(v => document.getElementById(v).classList.add('hidden'));
       document.getElementById(id).classList.remove('hidden');
     }
 
-    // --- 3. FETCH REAL-TIME PRICES FROM COINGECKO ---
     async function fetchLivePrices() {
         const ids = Object.values(coinGeckoIds).join(',');
-        const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
-        
         try {
-            const res = await fetch(url);
-            if (!res.ok) throw new Error('API Limit Reached or Network Error');
+            const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
             const data = await res.json();
-            
             for (const [symbol, cgId] of Object.entries(coinGeckoIds)) {
-                if (data[cgId] && data[cgId].usd) {
-                    livePrices[symbol] = data[cgId].usd;
-                } else {
-                    livePrices[symbol] = 0; // Fallback
-                }
+                livePrices[symbol] = (data[cgId] && data[cgId].usd) ? data[cgId].usd : 0;
             }
-        } catch (err) {
-            console.error("Price fetch error:", err);
-            // If the API fails, set all to 0 so the UI doesn't break
-            for (const symbol of Object.keys(coinGeckoIds)) {
-                livePrices[symbol] = 0; 
-            }
-        }
+        } catch (err) { console.error("Price error", err); }
     }
 
-    // --- 4. LOGIN LOGIC ---
     async function login() {
       const btn = document.getElementById('loginBtn');
-      btn.innerText = "Signing in...";
-      btn.disabled = true;
-
-      const email = document.getElementById('loginEmail').value;
-      const pass = document.getElementById('loginPass').value;
+      btn.innerText = "Signing in..."; btn.disabled = true;
 
       try {
         const res = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: email, password: pass })
+          body: JSON.stringify({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPass').value })
         });
-        
         const data = await res.json();
         if(!res.ok) throw new Error(data.error || 'Login failed');
         
@@ -213,57 +182,52 @@
         loadDashboard(); 
       } catch (err) { 
         alert("❌ LOGIN FAILED: " + err.message); 
-        btn.innerText = "Sign In";
-        btn.disabled = false;
+        btn.innerText = "Sign In"; btn.disabled = false;
       }
     }
 
-    // --- 5. DASHBOARD LOGIC (Wiring DB to API) ---
     async function loadDashboard() {
       try {
         const token = localStorage.getItem('cr_token');
-        if(!token) throw new Error("No token found. Please log in.");
+        if(!token) throw new Error("No token found.");
 
-        // Fetch prices first
         await fetchLivePrices();
 
-        // Fetch user data from your backend
-        const res = await fetch('/api/wallet', {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        
+        const res = await fetch('/api/wallet', { headers: { 'Authorization': 'Bearer ' + token } });
         const data = await res.json();
         if(!res.ok) throw new Error(data.error || 'Failed to load wallet');
 
         document.getElementById('walletAddress').innerText = data.walletAddress;
         
+        // Check Lock Status
+        isAccountLocked = data.locked;
+        if(isAccountLocked) {
+            document.getElementById('lockedBanner').classList.remove('hidden');
+            document.getElementById('lockReason').innerText = data.lock_reason || 'Contact Support';
+        } else {
+            document.getElementById('lockedBanner').classList.add('hidden');
+        }
+
         let balHtml = '';
         let totalPortfolioUsd = 0;
 
-        // Loop through user balances and calculate totals
         for (const [coin, amount] of Object.entries(data.balances)) {
           const price = livePrices[coin] || 0; 
           const usdValue = amount * price;
           totalPortfolioUsd += usdValue;
 
-          // Formatting the numbers to look professional
-          const formattedUsd = usdValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-          const formattedAmount = amount.toFixed(4);
-
           balHtml += `
-            <div class="coin-row">
+            <div class="coin-row" onclick="openCoinModal('${coin}', ${amount})">
               <div class="coin-name">${coin}</div> 
               <div class="coin-balance">
-                <div class="coin-amount">${formattedAmount}</div>
-                <div class="coin-usd">${formattedUsd}</div>
+                <div class="coin-amount">${amount.toFixed(4)}</div>
+                <div class="coin-usd">$${usdValue.toLocaleString('en-US', {minimumFractionDigits: 2})}</div>
               </div>
             </div>`;
         }
         
-        // Update the UI
-        const formattedTotal = totalPortfolioUsd.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-        document.getElementById('totalUsdValue').innerText = formattedTotal;
-        document.getElementById('balanceList').innerHTML = balHtml || '<p style="color:#aaa;">No balances yet</p>';
+        document.getElementById('totalUsdValue').innerText = '$' + totalPortfolioUsd.toLocaleString('en-US', {minimumFractionDigits: 2});
+        document.getElementById('balanceList').innerHTML = balHtml;
         
         show('dashView');
       } catch (err) {
@@ -272,30 +236,128 @@
       }
     }
 
-    // --- 6. REGISTER LOGIC ---
+    // MODAL LOGIC
+    function openCoinModal(coin, amount) {
+        currentCoin = coin;
+        document.getElementById('coinModal').classList.add('open');
+        document.getElementById('modalCoinName').innerText = coin;
+        document.getElementById('modalBalance').innerText = amount.toFixed(4) + ' ' + coin;
+        document.getElementById('modalUsd').innerText = '$' + (amount * (livePrices[coin] || 0)).toLocaleString('en-US', {minimumFractionDigits: 2});
+        document.getElementById('depositAddress').innerText = document.getElementById('walletAddress').innerText;
+        
+        // Disable buttons if locked
+        const actionBtns = document.querySelectorAll('.action-buttons button');
+        actionBtns.forEach(btn => {
+            if(btn.innerText !== 'History') {
+                btn.disabled = isAccountLocked;
+                btn.style.opacity = isAccountLocked ? '0.5' : '1';
+            }
+        });
+
+        showPanel('deposit'); // Default tab
+    }
+
+    function closeModal() { document.getElementById('coinModal').classList.remove('open'); }
+
+    function showPanel(panelName) {
+        ['deposit', 'send', 'withdraw', 'history'].forEach(p => document.getElementById('panel-' + p).classList.add('hidden'));
+        document.getElementById('panel-' + panelName).classList.remove('hidden');
+        
+        // Update button active state
+        const actionBtns = document.querySelectorAll('.action-buttons button');
+        actionBtns.forEach(btn => btn.classList.remove('active'));
+        if(panelName === 'deposit') document.getElementById('btnDeposit').classList.add('active');
+        if(panelName === 'send') document.getElementById('btnSend').classList.add('active');
+        if(panelName === 'withdraw') document.getElementById('btnWithdraw').classList.add('active');
+        if(panelName === 'history') {
+            document.getElementById('btnHistory').classList.add('active');
+            loadHistory();
+        }
+    }
+
+    async function loadHistory() {
+        try {
+            const token = localStorage.getItem('cr_token');
+            const res = await fetch(`/api/wallet/history/${currentCoin}`, { headers: { 'Authorization': 'Bearer ' + token } });
+            const data = await res.json();
+            
+            let html = '';
+            // Render Withdrawals
+            data.withdrawals.forEach(w => {
+                const color = w.status === 'Approved' ? 'tx-in' : (w.status === 'Declined' ? 'tx-out' : '');
+                html += `<div class="tx-item"><span style="color:#93a1b8;">Withdrawal (${w.status})</span> <span class="${color}">-${w.amount}</span></div>`;
+            });
+            // Render Transactions
+            data.transactions.forEach(t => {
+                const isOut = (t.type === 'send' || t.type === 'out');
+                html += `<div class="tx-item"><span style="color:#93a1b8;">${t.note}</span> <span class="${isOut ? 'tx-out' : 'tx-in'}">${isOut ? '-' : '+'}${t.amount}</span></div>`;
+            });
+            
+            document.getElementById('historyList').innerHTML = html || '<p style="color:#93a1b8; font-size:13px; text-align:center;">No history for this coin.</p>';
+        } catch (err) { alert("Failed to load history"); }
+    }
+
+    async function submitSend() {
+        if(isAccountLocked) return alert("Account suspended. Cannot perform operations.");
+        const address = document.getElementById('sendAddress').value;
+        const amount = parseFloat(document.getElementById('sendAmount').value);
+        if(!address || !amount) return alert("Please fill all fields");
+
+        try {
+            const token = localStorage.getItem('cr_token');
+            const res = await fetch('/api/wallet/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ coin: currentCoin, amount, receiverAddress: address })
+            });
+            const data = await res.json();
+            if(!res.ok) throw new Error(data.error);
+
+            alert('Funds sent successfully!');
+            closeModal();
+            loadDashboard();
+        } catch (err) { alert("❌ " + err.message); }
+    }
+
+    async function submitWithdraw() {
+        if(isAccountLocked) return alert("Account suspended. Cannot perform operations.");
+        const address = document.getElementById('wdAddress').value;
+        const amount = parseFloat(document.getElementById('wdAmount').value);
+        if(!address || !amount) return alert("Please fill all fields");
+
+        try {
+            const token = localStorage.getItem('cr_token');
+            const res = await fetch('/api/wallet/withdraw', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ coin: currentCoin, amount, address })
+            });
+            const data = await res.json();
+            if(!res.ok) throw new Error(data.error);
+
+            alert('Withdrawal requested! Waiting for Admin approval.');
+            closeModal();
+            loadDashboard();
+        } catch (err) { alert("❌ " + err.message); }
+    }
+
     async function register() {
       try {
         const res = await fetch('/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            name: document.getElementById('regName').value,
-            email: document.getElementById('regEmail').value,
-            password: document.getElementById('regPass').value,
-            country: document.getElementById('regCountry').value,
-            phone: document.getElementById('regPhone').value,
-            address: document.getElementById('regAddress').value
+            name: document.getElementById('regName').value, email: document.getElementById('regEmail').value,
+            password: document.getElementById('regPass').value, country: document.getElementById('regCountry').value,
+            phone: document.getElementById('regPhone').value, address: document.getElementById('regAddress').value
           })
         });
         const data = await res.json();
         if(!res.ok) throw new Error(data.error || 'Registration failed');
-        
-        alert("Account created! Please log in.");
-        show('loginView');
+        alert("Account created! Please log in."); show('loginView');
       } catch (err) { alert("❌ REGISTER FAILED: " + err.message); }
     }
 
-    // --- 7. LOGOUT LOGIC ---
     function logout() { 
         localStorage.removeItem('cr_token'); 
         show('loginView'); 
@@ -303,13 +365,7 @@
         document.getElementById('loginBtn').disabled = false;
     }
     
-    // --- 8. INITIALIZATION ---
-    // Check if user is already logged in when they open the page
-    if (localStorage.getItem('cr_token')) {
-        loadDashboard();
-    } else {
-        show('loginView');
-    }
+    if (localStorage.getItem('cr_token')) loadDashboard(); else show('loginView');
   </script>
 </body>
 </html>
