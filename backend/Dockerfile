@@ -1,10 +1,14 @@
-FROM node:18-alpine
+FROM node:20-alpine
 WORKDIR /app
-# Copy package files from the backend folder
-COPY backend/package*.json ./
-# Install dependencies
+
+# 1. Copy package files first
+COPY package*.json ./
+
+# 2. Install dependencies BEFORE copying the rest of the code
 RUN npm install
-# Copy the rest of the backend code
-COPY backend/ .
+
+# 3. Copy the rest of your backend code
+COPY . .
+
 EXPOSE 10000
 CMD ["npm", "start"]
