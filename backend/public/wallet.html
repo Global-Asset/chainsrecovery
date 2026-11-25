@@ -9,30 +9,16 @@
   input { width: 100%; padding: 12px; margin: 8px 0 16px; background: #05070e; border: 1px solid #2a3a4a; color: white; border-radius: 8px; box-sizing: border-box; }
   button { width: 100%; padding: 12px; background: #00e5a0; color: #03130d; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
   .hidden { display: none; }
-  .coin-row { background: #1a2a3a; padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; cursor: pointer; transition: 0.2s; }
-  .coin-row:hover { background: #2a3a4a; }
-  
-  /* Modal */
-  .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
-  .modal.open { display: flex; }
-  .modal-content { background: #0b1322; width: 100%; max-width: 400px; padding: 25px; border-radius: 15px; border: 1px solid #00e5a0; }
-  .tx-row { display: flex; justify-content: space-between; border-bottom: 1px solid #1a2a3a; padding: 10px 0; font-size: 13px; align-items: center; }
-  .btn-group { display: flex; gap: 10px; margin-top: 15px; }
-  .btn-group button { margin: 0; }
-  .btn-alt { background: #3b82f6; color: white; }
-  
-  /* Action Panels */
-  .action-panel { margin-top: 20px; padding-top: 20px; border-top: 1px solid #1a2a3a; }
-  .addr-box { background: #05070e; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 12px; word-break: break-all; border: 1px solid #1a2a3a; margin-bottom: 10px; color: #00e5a0; }
 </style>
 </head>
 <body>
+
   <!-- LOGIN -->
   <div id="loginView" class="card">
     <h2>Sign In</h2>
     <input type="email" id="loginEmail" placeholder="Email">
     <input type="password" id="loginPass" placeholder="Password">
-    <button onclick="login()">Sign In</button>
+    <button onclick="login()" id="loginBtn">Sign In</button>
     <p style="text-align:center; font-size:12px; color:#aaa; cursor:pointer;" onclick="show('registerView')">Register</p>
   </div>
 
@@ -49,82 +35,79 @@
     <p style="text-align:center; font-size:12px; color:#aaa; cursor:pointer;" onclick="show('loginView')">Already have an account? Login</p>
   </div>
 
-  <!-- OTP -->
-  <div id="otpView" class="card hidden">
-    <h2>Verify Email</h2>
-    <input type="text" id="otpCode" placeholder="000000">
-    <button onclick="verifyOtp()">Verify</button>
-  </div>
-
   <!-- DASHBOARD -->
   <div id="dashView" class="card hidden">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <h2>My Wallet</h2>
-      <button onclick="logout()" style="width:auto; padding:8px 12px; background:#ff6b81; color:white;">Sign Out</button>
+    <h2>My Wallet</h2>
+    <p id="welcomeText" style="color:#00e5a0; font-weight:bold; margin-bottom:20px;"></p>
+    <div style="background:#05070e; padding:15px; border-radius:8px; border:1px solid #1a2a3a; margin-bottom:20px;">
+      <small style="color:#93a1b8;">Wallet Address</small>
+      <div id="walletAddress" style="font-family:monospace; font-size:13px; color:#00e5a0; word-break:break-all; margin-top:5px;"></div>
     </div>
-    
-    <div style="margin-top:15px; background:#05070e; padding:10px; border-radius:8px; border:1px solid #1a2a3a;">
-      <small style="color:#93a1b8;">My Wallet Address (Click to copy)</small>
-      <div id="myWalletAddr" onclick="copyAddr()" style="font-family:monospace; font-size:12px; color:#00e5a0; cursor:pointer; word-break:break-all; margin-top:5px;"></div>
-    </div>
-
-    <h1 id="totalUsd" style="color:#00e5a0; margin-top:20px;">$0.00</h1>
-    <div id="coinList" style="margin-top:20px;"></div>
-  </div>
-
-  <!-- COIN MODAL -->
-  <div id="coinModal" class="modal">
-    <div class="modal-content">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h2 id="mCoinName" style="color:#00e5a0;">BTC</h2>
-        <button onclick="closeModal()" style="width:auto; padding:5px 10px; background:#ff6b81; color:white;">X</button>
-      </div>
-      
-      <div id="mBalance" style="font-size:24px; font-weight:bold; margin-bottom:5px;">0.00</div>
-      <div id="mUsd" style="color:#93a1b8; margin-bottom:20px;">$0.00</div>
-
-      <div class="btn-group">
-        <button class="btn-alt" onclick="showPanel('deposit')">Deposit</button>
-        <button style="background:#ffc857; color:#000;" onclick="showPanel('send')">Send</button>
-        <button style="background:#ff6b81; color:#fff;" onclick="showPanel('withdraw')">Withdraw</button>
-      </div>
-
-      <div id="panel-deposit" class="action-panel hidden">
-        <label style="color:#93a1b8; font-size:12px;">Copy your address to receive funds:</label>
-        <div class="addr-box" id="depositAddr"></div>
-        <button onclick="copyAddr()">Copy Address</button>
-      </div>
-
-      <div id="panel-send" class="action-panel hidden">
-        <label style="color:#93a1b8; font-size:12px;">Receiver Wallet Address</label>
-        <input type="text" id="sAddress" placeholder="0x...">
-        <label style="color:#93a1b8; font-size:12px;">Amount</label>
-        <input type="number" id="sAmount" placeholder="0.00">
-        <button onclick="submitSend()" style="background:#ffc857; color:#000;">Send Funds</button>
-      </div>
-
-      <div id="panel-withdraw" class="action-panel hidden">
-        <label style="color:#93a1b8; font-size:12px;">External Address</label>
-        <input type="text" id="wAddress" placeholder="0x...">
-        <label style="color:#93a1b8; font-size:12px;">Amount</label>
-        <input type="number" id="wAmount" placeholder="0.00">
-        <button onclick="submitWithdraw()" style="background:#ff6b81; color:#fff;">Request Withdrawal</button>
-      </div>
-
-      <h4 style="margin-top:20px; color:#fff;">History</h4>
-      <div id="mHistory" style="max-height:150px; overflow-y:auto;"></div>
-    </div>
+    <h3 style="margin-bottom:10px;">Balances</h3>
+    <div id="balanceList" style="background:#05070e; padding:15px; border-radius:8px; border:1px solid #1a2a3a;"></div>
+    <button onclick="logout()" style="background:#ff6b81; color:white; margin-top:20px;">Sign Out</button>
   </div>
 
   <script>
-    const API_BASE = ''; 
-    
-    // FIXED: Moved prices outside so they can be accessed by openCoin()
-    const prices = { BNB: 580, BTC: 67000, ETH: 3400, MATIC: 0.7, ECE: 1, USDT: 1, USDC: 1, SOL: 145, TRX: 0.13 };
-    
     function show(id) {
-      ['loginView','registerView','otpView','dashView'].forEach(v => document.getElementById(v).classList.add('hidden'));
+      ['loginView','registerView','dashView'].forEach(v => document.getElementById(v).classList.add('hidden'));
       document.getElementById(id).classList.remove('hidden');
+    }
+
+    async function login() {
+      const btn = document.getElementById('loginBtn');
+      btn.innerText = "Signing in...";
+      btn.disabled = true;
+
+      const email = document.getElementById('loginEmail').value;
+      const pass = document.getElementById('loginPass').value;
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, password: pass })
+        });
+        
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.error || 'Login failed');
+        
+        localStorage.setItem('cr_token', data.token);
+        loadDashboard(); 
+      } catch (err) { 
+        alert("❌ LOGIN FAILED: " + err.message); 
+        btn.innerText = "Sign In";
+        btn.disabled = false;
+      }
+    }
+
+    async function loadDashboard() {
+      try {
+        const token = localStorage.getItem('cr_token');
+        if(!token) throw new Error("No token found. Please log in.");
+
+        const res = await fetch('/api/wallet', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.error || 'Failed to load wallet');
+
+        document.getElementById('walletAddress').innerText = data.walletAddress;
+        
+        let balHtml = '';
+        for (const [coin, amount] of Object.entries(data.balances)) {
+          balHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <b>${coin}</b> <span>${amount.toFixed(4)}</span>
+          </div>`;
+        }
+        document.getElementById('balanceList').innerHTML = balHtml || '<p style="color:#aaa;">No balances yet</p>';
+        
+        show('dashView');
+      } catch (err) {
+        alert("❌ DASHBOARD ERROR: " + err.message);
+        logout();
+      }
     }
 
     async function register() {
@@ -142,172 +125,25 @@
           })
         });
         const data = await res.json();
-        if(!res.ok) throw new Error(data.error || 'Failed to register');
+        if(!res.ok) throw new Error(data.error || 'Registration failed');
         
-        // --- FIXED: Handle devOtp for testing ---
-        if (data.devOtp) {
-          alert(`Account created! Your TEST OTP is: ${data.devOtp}`);
-          document.getElementById('otpCode').value = data.devOtp; // Auto-fill
-        } else {
-          alert('Account created! Check your email for the OTP code.');
-        }
-        // ---------------------------------------
-
-        show('otpView');
-        window.currentEmail = document.getElementById('regEmail').value;
-      } catch (err) { alert(err.message); }
-    }
-
-    async function verifyOtp() {
-      try {
-        const res = await fetch('/api/auth/verify-otp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: window.currentEmail, code: document.getElementById('otpCode').value })
-        });
-        const data = await res.json();
-        if(!res.ok) throw new Error(data.error);
-        
-        alert('Verified! You can now log in.');
+        alert("Account created! Please log in.");
         show('loginView');
-      } catch (err) { alert(err.message); }
+      } catch (err) { alert("❌ REGISTER FAILED: " + err.message); }
     }
 
-    async function login() {
-      try {
-        const res = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPass').value })
-        });
-        const data = await res.json();
-        if(!res.ok) throw new Error(data.error);
-        
-        localStorage.setItem('cr_token', data.token);
-        loadDashboard();
-      } catch (err) { alert(err.message); }
-    }
-
-    async function loadDashboard() {
-      try {
-        const token = localStorage.getItem('cr_token');
-        const res = await fetch('/api/wallet', {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        const data = await res.json();
-        if(!res.ok) throw new Error(data.error);
-
-        window.myWalletAddress = data.walletAddress;
-        document.getElementById('myWalletAddr').innerText = data.walletAddress;
-        show('dashView');
-        
-        let total = 0;
-        let html = '';
-        
-        for (const [coin, amount] of Object.entries(data.balances)) {
-          const usd = amount * (prices[coin] || 0);
-          total += usd;
-          html += `<div class="coin-row" onclick="openCoin('${coin}', ${amount})">
-            <b>${coin}</b> 
-            <span>${amount.toFixed(4)} <small style="color:#93a1b8;">($${usd.toFixed(2)})</small></span>
-          </div>`;
-        }
-        document.getElementById('totalUsd').innerText = '$' + total.toFixed(2);
-        document.getElementById('coinList').innerHTML = html;
-      } catch (err) { 
+    function logout() { 
         localStorage.removeItem('cr_token'); 
         show('loginView'); 
-      }
+        document.getElementById('loginBtn').innerText = "Sign In";
+        document.getElementById('loginBtn').disabled = false;
     }
-
-    function copyAddr() {
-      navigator.clipboard.writeText(window.myWalletAddress);
-      alert('Address Copied: ' + window.myWalletAddress);
-    }
-
-    async function openCoin(coin, amount) {
-      window.currentCoin = coin;
-      document.getElementById('coinModal').classList.add('open');
-      document.getElementById('mCoinName').innerText = coin;
-      document.getElementById('mBalance').innerText = amount + ' ' + coin;
-      document.getElementById('mUsd').innerText = '$' + (amount * (prices[coin] || 0)).toFixed(2);
-      document.getElementById('depositAddr').innerText = window.myWalletAddress;
-      
-      showPanel(''); 
-      
-      try {
-        const token = localStorage.getItem('cr_token');
-        const res = await fetch('/api/wallet/history', {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        const data = await res.json();
-        
-        const coinTxs = data.transactions.filter(t => t.coin === coin);
-        let hHtml = '';
-        coinTxs.forEach(t => {
-          const color = t.type === 'in' ? '#00e5a0' : '#ff6b81';
-          const sign = t.type === 'in' ? '+' : '-';
-          hHtml += `<div class="tx-row">
-            <span style="color:#93a1b8; font-size:11px;">${t.note}</span> 
-            <span style="color:${color}; font-weight:bold;">${sign}${t.amount}</span>
-          </div>`;
-        });
-        if(!hHtml) hHtml = '<p style="color:#93a1b8;font-size:12px;">No history yet.</p>';
-        document.getElementById('mHistory').innerHTML = hHtml;
-      } catch (err) {}
-    }
-
-    function closeModal() { document.getElementById('coinModal').classList.remove('open'); }
-    function showPanel(panel) {
-      ['deposit', 'send', 'withdraw'].forEach(p => document.getElementById('panel-' + p).classList.add('hidden'));
-      if(panel) document.getElementById('panel-' + panel).classList.remove('hidden');
-    }
-
-    async function submitSend() {
-      try {
-        const token = localStorage.getItem('cr_token');
-        const res = await fetch('/api/wallet/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({
-            coin: window.currentCoin,
-            amount: Number(document.getElementById('sAmount').value),
-            receiverAddress: document.getElementById('sAddress').value
-          })
-        });
-        const data = await res.json();
-        if(!res.ok) throw new Error(data.error);
-        
-        alert('Funds sent successfully!');
-        closeModal();
-        loadDashboard();
-      } catch (err) { alert(err.message); }
-    }
-
-    async function submitWithdraw() {
-      try {
-        const token = localStorage.getItem('cr_token');
-        const res = await fetch('/api/wallet/withdraw', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({
-            coin: window.currentCoin,
-            amount: Number(document.getElementById('wAmount').value),
-            address: document.getElementById('wAddress').value
-          })
-        });
-        const data = await res.json();
-        if(!res.ok) throw new Error(data.error);
-        
-        alert('Withdrawal request submitted! Waiting for Admin approval.');
-        closeModal();
-        loadDashboard();
-      } catch (err) { alert(err.message); }
-    }
-
-    function logout() { localStorage.removeItem('cr_token'); show('loginView'); }
     
-    if (localStorage.getItem('cr_token')) loadDashboard(); else show('loginView');
+    if (localStorage.getItem('cr_token')) {
+        loadDashboard();
+    } else {
+        show('loginView');
+    }
   </script>
 </body>
 </html>
