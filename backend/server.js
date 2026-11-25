@@ -4,32 +4,40 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const { initDb } = require('./db'); // Import the init function
 
 const app = express();
-app.set('trust proxy', 1);
+
+// --- FIX 1: Trust Proxy for Rate Limiter ---
+app.set('trust proxy', 1); 
+
+// Middleware
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(express.json({ limit: '2mb' }));
-
-// Serve the frontend files (HTML, CSS, JS)
+app.use(cors({ origin: true }));
+app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors({ origin: true, credentials: true }));
 
-// API Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/wallet', require('./routes/wallet'));
-app.use('/api/cases', require('./routes/cases'));
-app.use('/api/admin', require('./routes/admin'));
+// Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+    max: 100
+    });
+    app.use('/api', limiter);
 
-// Health check
-app.get('/api/health', (req, res) => res.json({ ok: true, status: 'Live' }));
+    // --- ROUTES ---
+    app.use('/api/auth', require('./routes/auth'));
+    app.use('/api/wallet', require('./routes/wallet'));
+    app.use('/api/admin', require('./routes/admin'));
 
-// Fallback for frontend routing
-app.get(/^(?!\/api).*/, (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+    // --- START SERVER ---
+    const PORT = process.env.PORT || 10000;
 
-// RENDER REQUIRES process.env.PORT
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`\n✅ ChainRecover running on port ${PORT}`);
-});
+    // --- FIX 2: Initialize DB before starting the server ---
+    initDb().then(() => {
+      app.listen(PORT, () => {
+          console.log(`✅ ChainRecover backend is running on port ${PORT}`);
+            });
+            }).catch(err => {
+              console.error("❌ Failed to initialize database:", err);
+                process.exit(1); // Stop the server if DB fails
+                });
