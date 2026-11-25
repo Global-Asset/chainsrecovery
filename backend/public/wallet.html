@@ -14,7 +14,6 @@
   button:hover { background: #00c98c; }
   .hidden { display: none !important; }
   
-  /* Dashboard Styles */
   .locked-banner { background: rgba(255, 107, 129, 0.1); border: 1px solid #ff6b81; color: #ff6b81; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-weight: bold; text-align: center; }
   .total-box { text-align: center; margin-bottom: 25px; background: rgba(0, 229, 160, 0.08); padding: 20px; border-radius: 12px; border: 1px solid rgba(0, 229, 160, 0.2); }
   .total-label { color: #93a1b8; font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
@@ -27,7 +26,6 @@
   .coin-amount { font-size: 16px; font-weight: 600; }
   .coin-usd { font-size: 13px; color: #93a1b8; margin-top: 4px; }
   
-  /* Modal Styles */
   .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100; backdrop-filter: blur(5px); }
   .modal.open { display: flex; }
   .modal-content { background: #0b1322; width: 100%; max-width: 400px; padding: 25px; border-radius: 15px; border: 1px solid #00e5a0; max-height: 90vh; overflow-y: auto; }
@@ -47,7 +45,6 @@
 </head>
 <body>
 
-  <!-- LOGIN VIEW -->
   <div id="loginView" class="card">
     <h2>Sign In</h2>
     <input type="email" id="loginEmail" placeholder="Email Address">
@@ -56,7 +53,6 @@
     <p style="text-align:center; font-size:13px; color:#93a1b8; cursor:pointer; margin-top:20px;" onclick="show('registerView')">Don't have an account? <b style="color:#00e5a0;">Register</b></p>
   </div>
 
-  <!-- REGISTER VIEW -->
   <div id="registerView" class="card hidden">
     <h2>Create Account</h2>
     <input type="text" id="regName" placeholder="Full Name">
@@ -69,10 +65,7 @@
     <p style="text-align:center; font-size:13px; color:#93a1b8; cursor:pointer; margin-top:20px;" onclick="show('loginView')">Already have an account? <b style="color:#00e5a0;">Sign In</b></p>
   </div>
 
-  <!-- DASHBOARD VIEW -->
   <div id="dashView" class="card hidden">
-    
-    <!-- SUSPENDED ACCOUNT BANNER -->
     <div id="lockedBanner" class="locked-banner hidden">
       🚫 Account Suspended: <span id="lockReason"></span>
     </div>
@@ -95,7 +88,6 @@
     <button onclick="logout()" style="background:#ff6b81; color:white; margin-top:30px;">Sign Out</button>
   </div>
 
-  <!-- COIN MODAL (The pop-up dashboard) -->
   <div class="modal" id="coinModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -113,37 +105,35 @@
         <button onclick="showPanel('history')" id="btnHistory">History</button>
       </div>
 
-      <!-- DEPOSIT PANEL -->
       <div id="panel-deposit" class="panel hidden">
         <p style="font-size: 13px; color: #93a1b8; margin-bottom: 10px;">Send funds to this address:</p>
         <div style="font-family: monospace; color: #00e5a0; word-break: break-all; background: #0b1322; padding: 10px; border-radius: 8px;" id="depositAddress"></div>
       </div>
 
-      <!-- SEND PANEL -->
       <div id="panel-send" class="panel hidden">
         <input type="text" id="sendAddress" placeholder="Receiver Address">
         <input type="number" id="sendAmount" placeholder="Amount">
         <button onclick="submitSend()">Send Funds</button>
       </div>
 
-      <!-- WITHDRAW PANEL -->
       <div id="panel-withdraw" class="panel hidden">
         <input type="text" id="wdAddress" placeholder="External Wallet Address">
         <input type="number" id="wdAmount" placeholder="Amount">
         <button onclick="submitWithdraw()">Request Withdrawal</button>
       </div>
 
-      <!-- HISTORY PANEL -->
       <div id="panel-history" class="panel hidden">
-        <div id="historyList" style="max-height: 200px; overflow-y: auto;">
-          <!-- Transactions load here -->
-        </div>
+        <div id="historyList" style="max-height: 200px; overflow-y: auto;"></div>
       </div>
 
     </div>
   </div>
 
   <script>
+    // ⚠️ SECURITY FIX: Using sessionStorage instead of localStorage. 
+    // This means the user is logged out automatically when they close the tab.
+    const TOKEN_KEY = 'cr_token_session'; 
+
     const coinGeckoIds = { BNB: 'binancecoin', BTC: 'bitcoin', ETH: 'ethereum', MATIC: 'matic-network', ECE: 'ece', USDT: 'tether', USDC: 'usd-coin', SOL: 'solana', TRX: 'tron' };
     let livePrices = {};
     let currentCoin = '';
@@ -178,7 +168,8 @@
         const data = await res.json();
         if(!res.ok) throw new Error(data.error || 'Login failed');
         
-        localStorage.setItem('cr_token', data.token);
+        // SAVE TO SESSION STORAGE
+        sessionStorage.setItem(TOKEN_KEY, data.token);
         loadDashboard(); 
       } catch (err) { 
         alert("❌ LOGIN FAILED: " + err.message); 
@@ -188,18 +179,23 @@
 
     async function loadDashboard() {
       try {
-        const token = localStorage.getItem('cr_token');
-        if(!token) throw new Error("No token found.");
+        const token = sessionStorage.getItem(TOKEN_KEY);
+        if(!token) throw new Error("No token found. Please log in.");
 
         await fetchLivePrices();
 
         const res = await fetch('/api/wallet', { headers: { 'Authorization': 'Bearer ' + token } });
         const data = await res.json();
+        
+        // If token is expired, kick them out
+        if(res.status === 401) {
+            sessionStorage.removeItem(TOKEN_KEY);
+            throw new Error("Session expired. Please log in again.");
+        }
         if(!res.ok) throw new Error(data.error || 'Failed to load wallet');
 
         document.getElementById('walletAddress').innerText = data.walletAddress;
         
-        // Check Lock Status
         isAccountLocked = data.locked;
         if(isAccountLocked) {
             document.getElementById('lockedBanner').classList.remove('hidden');
@@ -231,12 +227,11 @@
         
         show('dashView');
       } catch (err) {
-        alert("❌ DASHBOARD ERROR: " + err.message);
+        alert("❌ " + err.message);
         logout();
       }
     }
 
-    // MODAL LOGIC
     function openCoinModal(coin, amount) {
         currentCoin = coin;
         document.getElementById('coinModal').classList.add('open');
@@ -245,7 +240,6 @@
         document.getElementById('modalUsd').innerText = '$' + (amount * (livePrices[coin] || 0)).toLocaleString('en-US', {minimumFractionDigits: 2});
         document.getElementById('depositAddress').innerText = document.getElementById('walletAddress').innerText;
         
-        // Disable buttons if locked
         const actionBtns = document.querySelectorAll('.action-buttons button');
         actionBtns.forEach(btn => {
             if(btn.innerText !== 'History') {
@@ -254,7 +248,7 @@
             }
         });
 
-        showPanel('deposit'); // Default tab
+        showPanel('deposit');
     }
 
     function closeModal() { document.getElementById('coinModal').classList.remove('open'); }
@@ -263,7 +257,6 @@
         ['deposit', 'send', 'withdraw', 'history'].forEach(p => document.getElementById('panel-' + p).classList.add('hidden'));
         document.getElementById('panel-' + panelName).classList.remove('hidden');
         
-        // Update button active state
         const actionBtns = document.querySelectorAll('.action-buttons button');
         actionBtns.forEach(btn => btn.classList.remove('active'));
         if(panelName === 'deposit') document.getElementById('btnDeposit').classList.add('active');
@@ -277,17 +270,15 @@
 
     async function loadHistory() {
         try {
-            const token = localStorage.getItem('cr_token');
+            const token = sessionStorage.getItem(TOKEN_KEY);
             const res = await fetch(`/api/wallet/history/${currentCoin}`, { headers: { 'Authorization': 'Bearer ' + token } });
             const data = await res.json();
             
             let html = '';
-            // Render Withdrawals
             data.withdrawals.forEach(w => {
                 const color = w.status === 'Approved' ? 'tx-in' : (w.status === 'Declined' ? 'tx-out' : '');
                 html += `<div class="tx-item"><span style="color:#93a1b8;">Withdrawal (${w.status})</span> <span class="${color}">-${w.amount}</span></div>`;
             });
-            // Render Transactions
             data.transactions.forEach(t => {
                 const isOut = (t.type === 'send' || t.type === 'out');
                 html += `<div class="tx-item"><span style="color:#93a1b8;">${t.note}</span> <span class="${isOut ? 'tx-out' : 'tx-in'}">${isOut ? '-' : '+'}${t.amount}</span></div>`;
@@ -304,7 +295,7 @@
         if(!address || !amount) return alert("Please fill all fields");
 
         try {
-            const token = localStorage.getItem('cr_token');
+            const token = sessionStorage.getItem(TOKEN_KEY);
             const res = await fetch('/api/wallet/send', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
@@ -326,7 +317,7 @@
         if(!address || !amount) return alert("Please fill all fields");
 
         try {
-            const token = localStorage.getItem('cr_token');
+            const token = sessionStorage.getItem(TOKEN_KEY);
             const res = await fetch('/api/wallet/withdraw', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
@@ -359,13 +350,14 @@
     }
 
     function logout() { 
-        localStorage.removeItem('cr_token'); 
+        sessionStorage.removeItem(TOKEN_KEY); 
         show('loginView'); 
         document.getElementById('loginBtn').innerText = "Sign In";
         document.getElementById('loginBtn').disabled = false;
     }
     
-    if (localStorage.getItem('cr_token')) loadDashboard(); else show('loginView');
+    // Check session storage on page load
+    if (sessionStorage.getItem(TOKEN_KEY)) loadDashboard(); else show('loginView');
   </script>
 </body>
 </html>
