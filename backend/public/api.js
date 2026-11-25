@@ -1,3 +1,5 @@
+// public/api.js
+
 const Tokens = {
     setAdmin: (token) => sessionStorage.setItem('admin_token_session', token),
     getAdmin: () => sessionStorage.getItem('admin_token_session'),
@@ -10,6 +12,7 @@ async function api(url, options = {}) {
         ...(options.headers || {})
     };
 
+    // Attach the Admin Token automatically if requested
     if (options.auth === 'admin') {
         const token = Tokens.getAdmin();
         if (token) {
@@ -32,16 +35,18 @@ async function api(url, options = {}) {
     try {
         data = await res.json();
     } catch (e) {
-        throw new Error(`Server crashed (Status ${res.status}). Check Render Logs!`);
+        // If the backend crashes (e.g., code error), it won't return JSON
+        throw new Error(`Server Error (Status ${res.status}). Check Render Logs!`);
     }
 
+    // Only log out if the server explicitly says 401 (Unauthorized) or 403 (Forbidden)
     if (res.status === 401 || res.status === 403) {
         Tokens.clearAdmin();
-        throw new Error('Session expired or invalid token.');
+        throw new Error('Session expired or invalid token. Please log in again.');
     }
 
+    // If there's another error (like 500), show the real error message from the backend
     if (!res.ok) {
-        // This will show the REAL error from the backend (e.g., "Failed to load users")
         throw new Error(data.error || 'Unknown server error');
     }
     
