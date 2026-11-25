@@ -1,5 +1,5 @@
 const express = require('express');
-const db = require('../db');
+const { db } = require('../db'); // 🚨 CRITICAL FIX: Curly braces MUST be here
 const { signToken, requireAdmin } = require('../middleware/auth');
 const { COINS } = require('../utils');
 const router = express.Router();
@@ -25,6 +25,7 @@ router.get('/users', requireAdmin, async (req, res) => {
 
     res.json({ ok: true, users: formattedUsers });
   } catch (err) {
+    console.error("Admin Users Error:", err);
     res.status(500).json({ error: 'Failed to load users' });
   }
 });
@@ -79,6 +80,7 @@ router.patch('/users/:id/balances', requireAdmin, async (req, res) => {
     if (batchStmts.length > 0) await db.batch(batchStmts);
     res.json({ ok: true });
   } catch (err) {
+    console.error("Balance update error:", err);
     res.status(500).json({ error: 'Failed to update balances' });
   }
 });
