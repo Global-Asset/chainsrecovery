@@ -205,30 +205,25 @@
     </div>
   </div>
 
-  <!-- Load api.js FIRST so the functions are available -->
   <script src="/api.js"></script>
   
   <script>
     let allUsers = [];
     let currentUser = null;
-    let modalActionType = ''; // 'lock', 'delete', 'save'
+    let modalActionType = ''; 
     
     const prices = { BNB: 580, BTC: 67000, ETH: 3400, MATIC: 0.7, ECE: 1, USDT: 1, USDC: 1, SOL: 145, TRX: 0.13 };
     const COINS = ['BNB','BTC','ETH','MATIC','ECE','USDT','USDC','SOL','TRX'];
 
-    // --- LOGIN ---
     async function login() {
       try {
         const pass = document.getElementById('adminPass').value;
         if(!pass) return alert("Enter password");
         
-        const data = await api('/api/admin/login', { 
-            method: 'POST', 
-            body: { password: pass } 
-        });
+        const data = await api('/api/admin/login', { method: 'POST', body: { password: pass } });
         Tokens.setAdmin(data.token);
         loadDash();
-      } catch (err) { alert("❌ " + err.message); }
+      } catch (err) { alert("❌ Login Failed: " + err.message); }
     }
 
     async function loadDash() {
@@ -238,19 +233,19 @@
       loadWithdrawals();
     }
 
-    // --- LOAD USERS ---
     async function loadUsers() {
       try {
         const data = await api('/api/admin/users', { auth: 'admin' });
         allUsers = data.users || [];
         renderUsers();
       } catch (err) { 
-        alert('Session expired. Please log in again.'); 
-        logout(); 
+        alert('❌ Dashboard Error: ' + err.message); 
+        if (err.message.includes('expired') || err.message.includes('invalid')) {
+            logout(); 
+        }
       }
     }
 
-    // --- RENDER USERS (With Search) ---
     function renderUsers() {
       const query = document.getElementById('userSearch').value.toLowerCase();
       let html = '';
@@ -287,7 +282,6 @@
       document.getElementById('userTable').innerHTML = html;
     }
 
-    // --- LOAD WITHDRAWALS ---
     async function loadWithdrawals() {
       try {
         const data = await api('/api/admin/withdrawals', { auth: 'admin' });
@@ -326,7 +320,6 @@
       } catch (err) { console.error(err); }
     }
 
-    // --- PROCESS WITHDRAWAL ---
     async function processW(id, action) {
       if(!confirm(`Are you sure you want to ${action} this withdrawal?`)) return;
       try {
@@ -337,7 +330,6 @@
       } catch (err) { alert("❌ " + err.message); }
     }
 
-    // --- OPEN DRAWER ---
     function openDrawer(id) {
       currentUser = allUsers.find(u => u.id === id);
       document.getElementById('dName').innerText = currentUser.name;
@@ -368,14 +360,12 @@
       document.getElementById('drawer').classList.add('open');
     }
 
-    // --- CLOSE DRAWER ---
     function closeDrawer(e) {
       if (e && e.target !== document.getElementById('drawer')) return;
       document.getElementById('drawer').classList.remove('open');
       currentUser = null;
     }
 
-    // --- CUSTOM MODAL LOGIC ---
     function openLockModal() {
       if(!currentUser) return;
       modalActionType = 'lock';
@@ -479,13 +469,11 @@
       }
     }
 
-    // --- LOGOUT ---
     function logout() { 
       Tokens.clearAdmin(); 
       window.location.reload(); 
     }
 
-    // Check if already logged in on page load
     if (Tokens.getAdmin()) {
       loadDash();
     }
