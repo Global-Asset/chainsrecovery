@@ -205,7 +205,8 @@
     </div>
   </div>
 
-  <script src="api.js"></script>
+  <!-- Load api.js FIRST so the functions are available -->
+  <script src="/api.js"></script>
   
   <script>
     let allUsers = [];
@@ -218,13 +219,16 @@
     // --- LOGIN ---
     async function login() {
       try {
+        const pass = document.getElementById('adminPass').value;
+        if(!pass) return alert("Enter password");
+        
         const data = await api('/api/admin/login', { 
             method: 'POST', 
-            body: { password: document.getElementById('adminPass').value } 
+            body: { password: pass } 
         });
         Tokens.setAdmin(data.token);
         loadDash();
-      } catch (err) { alert(err.message); }
+      } catch (err) { alert("❌ " + err.message); }
     }
 
     async function loadDash() {
@@ -263,7 +267,6 @@
 
       filtered.forEach(u => {
         let totalUsd = 0;
-        // Safely check balances
         const bals = u.balances || {};
         for (const [coin, amt] of Object.entries(bals)) {
           totalUsd += amt * (prices[coin] || 0);
@@ -331,7 +334,7 @@
         alert('Withdrawal ' + action + 'd successfully.');
         loadWithdrawals(); 
         loadUsers();
-      } catch (err) { alert(err.message); }
+      } catch (err) { alert("❌ " + err.message); }
     }
 
     // --- OPEN DRAWER ---
@@ -380,8 +383,8 @@
       
       document.getElementById('modalTitle').innerText = isLocking ? 'Suspend Account' : 'Activate Account';
       document.getElementById('modalDesc').innerText = isLocking 
-        ? `Are you sure you want to suspend ${currentUser.name}? They will not be able to log in.` 
-        : `Reactivate ${currentUser.name}'s account? They will regain access.`;
+        ? `Are you sure you want to suspend ${currentUser.name}? They will not be able to log in or trade.` 
+        : `Reactivate ${currentUser.name}'s account? They will regain full access.`;
         
       const input = document.getElementById('modalInput');
       if (isLocking) {
@@ -430,6 +433,7 @@
     async function executeModalAction() {
       if (!currentUser || !modalActionType) return;
       const btn = document.getElementById('modalConfirmBtn');
+      const originalText = btn.innerText;
       btn.innerText = 'Processing...';
       btn.disabled = true;
 
@@ -440,19 +444,19 @@
           await api(`/api/admin/users/${currentUser.id}/lock`, { method: 'PATCH', auth: 'admin', body: { locked: isLocking, reason } });
           await loadUsers(); 
           closeDrawer();
+          closeModal();
           
         } else if (modalActionType === 'delete') {
           const confirmText = document.getElementById('modalInput').value;
           if (confirmText !== 'DELETE') {
             alert('You must type DELETE exactly to confirm.');
-            btn.innerText = 'Confirm';
-            btn.disabled = false;
             return;
           }
           await api(`/api/admin/users/${currentUser.id}`, { method: 'DELETE', auth: 'admin' });
           alert('User deleted permanently.');
           await loadUsers();
           closeDrawer();
+          closeModal();
           
         } else if (modalActionType === 'save') {
           const newBals = {};
@@ -462,15 +466,15 @@
           const note = document.getElementById('adjustNote').value || 'Admin Balance Adjustment';
           
           await api(`/api/admin/users/${currentUser.id}/balances`, { method: 'PATCH', auth: 'admin', body: { balances: newBals, note } });
-          alert('Balances updated and history logged!'); 
+          alert('✅ Balances updated and history logged!'); 
           await loadUsers(); 
           closeDrawer();
+          closeModal();
         }
       } catch (err) {
-        alert(err.message);
+        alert("❌ " + err.message);
       } finally {
-        closeModal();
-        btn.innerText = 'Confirm';
+        btn.innerText = originalText;
         btn.disabled = false;
       }
     }
@@ -478,10 +482,10 @@
     // --- LOGOUT ---
     function logout() { 
       Tokens.clearAdmin(); 
-      location.reload(); 
+      window.location.reload(); 
     }
 
-    // Check if already logged in
+    // Check if already logged in on page load
     if (Tokens.getAdmin()) {
       loadDash();
     }
